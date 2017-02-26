@@ -1,6 +1,6 @@
 /* environ.h */
 #ifndef ENVIRON_H
-#define ENVIRON_H 
+#define ENVIRON_H
 /* ----------------------------types--------------------------------------------*/
 /* environnement := liste de couples (identificateur, entier) */
 typedef struct cellenv{
@@ -31,4 +31,11 @@ extern int valch(ENV rho, char *var); /* valeur de var dans envirnt rho         
 #define Jp 263
 #define Jz 264
 #define St 265
+#define If 266
+#define Th 267
+#define El 268
+#define Wh 269
+#define Do 270
+#define Se 271
+#define NUMBER 272
 #endif
