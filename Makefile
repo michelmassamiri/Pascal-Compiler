@@ -1,20 +1,15 @@
-SRC = $(wildcard *.c)
-FLEX = $(wildcard *.l)
-OBJS = $(SRC:.c=.o)
-OBJET = $(FLEX:.l=.o)
-PRJ = exo
+CC=gcc
+CFLAGS:= -std=gnu99
+LDFLAGS:= -lfl
+SRCS = $(wildcard *.l)
 
-.PHONY : clean
+PROGS = $(patsubst %.l,%,$(SRCS))
 
-all : $(OBJET) $(OBJS)
-	$(CC) $(OBJET) $(OBJS) -o $(PRJ)
-	rm $(OBJS) $(OBJET)
+all: $(PROGS)
 
-
-l :
-	make all
-	./exo
-
+%: %.l
+	flex -o $@.yy.c $<
+	$(CC) $(CFLAGS) -o $@ $@.yy.c $(LDFLAGS)
 
 clean :
-	rm $(PRJ)
+	rm *.yy.c $(PROGS)
