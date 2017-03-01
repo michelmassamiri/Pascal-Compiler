@@ -9,6 +9,8 @@ char *etiquette;
 int operateur;
 char *arg1, *arg2, *dest;
 
+BILQUAD bq;
+
 %}
 
 %option noyywrap
@@ -18,10 +20,10 @@ char *arg1, *arg2, *dest;
 
 %%
 
-<INITIAL>[A-Za-z_][A-Za-z0-9_]* {
+<INITIAL>ET[0-9]* {
                                     BEGIN(OP);
                                     free(etiquette);
-                                    etiquette = malloc(sizeof(char)*yylen);
+                                    etiquette = malloc(sizeof(char)*yyleng);
                                     strcpy(etiquette, yytext);
                                     ECHO;
                                 }
@@ -46,40 +48,43 @@ char *arg1, *arg2, *dest;
                                         operateur = Jz;
                                     else if(strcmp(yytext+1, "St"))
                                         operateur = St;
-                                    else if(strcmp(yytext+1, "If"))
-                                        operateur = If;
-                                    else if(strcmp(yytext+1, "Th"))
-                                        operateur = Th;
-                                    else if(strcmp(yytext+1, "El"))
-                                        operateur = El;
-                                    else if(strcmp(yytext+1, "Wh"))
-                                        operateur = Wh;
-                                    else if(strcmp(yytext+1, "Do"))
-                                        operateur = Do;
-                                    else if(strcmp(yytext+1, "Se"))
-                                        operateur = Se;
+                                    else
+                                    {
+                                        printf("\n An error as been thrown\n");
+                                        return -1;
+                                    }
                                     ECHO;
                }
 
-<ARG1>:[A-Za-z][A-Za-z0-9]* {
+<ARG1>:[A-Za-z0-9]* {
                                     BEGIN(ARG2);
-
+                                    free(arg1);
+                                    arg1 = malloc(sizeof(char)*(yyleng-1));
+                                    strcpy(arg1, yytext+1);
                                     ECHO;
-                            }
-                            
+                    }
 
-<ARG2>:[A-Za-z][A-Za-z0-9]* {
+
+<ARG2>:[A-Za-z0-9]* {
                                     BEGIN(DEST);
-
+                                    free(arg2);
+                                    arg2 = malloc(sizeof(char)*(yyleng-1));
+                                    strcpy(arg2, yytext+1);
                                     ECHO;
-                            }
+                    }
 
 
-<DEST>:[A-Za-z][A-Za-z0-9]* {
+<DEST>:[A-Za-z0-9]* {
                                     BEGIN(INITIAL);
+                                    free(dest);
+                                    dest = malloc(sizeof(char)*(yyleng-1));
+                                    strcpy(dest, yytext+1);
+
+                                    BILQUAD b = creer_bilquad(creer_quad(etiquette, operateur, arg1, arg2, dest));
+                                    bq = concatq(bq, b);
 
                                     ECHO;
-                            }
+                    }
 
 
 
