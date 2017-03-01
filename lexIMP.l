@@ -1,7 +1,10 @@
 %{
   #include <stdio.h>
-  #include "environ.h"
-  int yylval;
+  #include <string.h>
+  #include "environ_IMP.h"
+
+  #include "YaccIMP.tab.h"
+  void yyerror(char*);
 %}
 
 %option noyywrap
@@ -14,18 +17,14 @@ then                              {return Th;}
 else                              {return El;}
 while                             {return Wh;}
 do                                {return Do;}
-[0-9]+                            {yylval = atoi(yytext); return NUMBER;}
-[A-Z][A-Za-z0-9]*                 {printf("%s ", yytext);}
+[0-9]+                            {yylval.iValue = atoi(yytext); return CONSTANT;}
+[A-Z][A-Za-z0-9]*                 {yylval.id = *yytext; return VARIABLE;}
 "+"                               {return Pl;}
 "-"                               {return Mo;}
 "*"                               {return Mu;}
 ":="                              {return Af;}
 ";"                               {return Se;}
 [ \t]                             {}
-.                                 {printf("mot non reconnu\n");}
+.                                 yyerror("Unknown character");
 
 %%
-int main(int argc, char** argv) {
-  yylex();
-  return 0;
-}
