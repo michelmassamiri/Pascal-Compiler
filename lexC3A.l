@@ -18,7 +18,9 @@
 <ARG2>:[A-Za-z][A-Za-z0-9]* {printf(" arg2 ");BEGIN(DEST); ECHO;}
 <DEST>:[A-Za-z][A-Za-z0-9]* {printf(" dets ");BEGIN(INITIAL); ECHO;}
 
-.* {printf("\n An error as been thrown\n"); BEGIN(INITIAL);}
+
+[ \t] {}
+. {printf("\n An error as been thrown\n"); BEGIN(INITIAL);}
 
 %%
 
