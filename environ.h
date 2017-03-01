@@ -22,6 +22,7 @@ extern int valch(ENV rho, char *var); /* valeur de var dans envirnt rho         
 /* ------------------CONSTANTES -------------------------------------------------*/
 #define MAXIDENT 16          /* long max d'un identificateur de variable         */
 #define MAXQUAD  5*MAXIDENT  /* long max d'un quadruplet c3a                     */
+
 #define Pl 257
 #define Mo 258
 #define Mu 259
@@ -31,6 +32,7 @@ extern int valch(ENV rho, char *var); /* valeur de var dans envirnt rho         
 #define Jp 263
 #define Jz 264
 #define St 265
+
 #define If 266
 #define Th 267
 #define El 268

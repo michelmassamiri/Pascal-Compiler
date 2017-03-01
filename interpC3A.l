@@ -100,6 +100,72 @@ int main(int ac, char** av)
     arg1 = malloc(sizeof(char));
     arg2 = malloc(sizeof(char));
     yylex();
+
+    ENV environnement = Envalloc();
+    QUAD q = bq.debut, tmpQuad;
+    int tmp1, tmp2;
+
+    while(q != NULL)
+    {
+        if(q.OP == Jp)
+        {
+            q = rechbq(q.DEST, bq);
+            continue;
+        }
+        else if(q.OP == St)
+            break;
+        else if(q.OP == Jz)
+        {
+            tmp1 = atoi(arg1);
+            if(arg1 == 0)
+            {
+                q = rechbq(q.DEST, bq);
+                continue;
+            }
+        }
+        else if(q.OP == Af)
+        {
+            ENV e2 = rech(q.ARG2, environnement);
+            ENV e1 = rech(q.ARG1, environnement);
+
+            if(e2 == NULL)
+            {
+                e2 = Envalloc();
+                initenv(e2, 0);
+            }
+            if(e1 != NULL)
+                e2.VAL = e1.VAL;
+        }
+        else if(q.OP == Afc)
+        {
+            ENV e = rech(q.DEST, environnement);
+            if(e == NULL)
+            {
+                initenv(e, q.DEST);
+
+            }
+
+            e.VAL = atoi(q.ARG1);
+
+        }
+        else if(q.OP == Pl)
+        {
+
+        }
+        else if(q.OP == Mu)
+        {
+
+        }
+        else if(q.OP == Mo)
+        {
+
+        }
+        else if(q.OP == Sk) {;}
+
+        q = q.SUIV;
+    }
+
+
     free(etiquette);
     free(dest);
     free(arg1);
