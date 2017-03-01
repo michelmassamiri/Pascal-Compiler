@@ -5,9 +5,9 @@
 #include "bilquad.h"
 #include "environ.h"
 
-char *etiquette = malloc(sizeof(char));
+char *etiquette;
 int operateur;
-char *arg1 = malloc(sizeof(char)), *arg2 = malloc(sizeof(char)), *dest = malloc(sizeof(char));
+char *arg1, *arg2, *dest;
 
 %}
 
@@ -61,11 +61,26 @@ char *arg1 = malloc(sizeof(char)), *arg2 = malloc(sizeof(char)), *dest = malloc(
                                     ECHO;
                }
 
-<ARG1>:[A-Za-z][A-Za-z0-9]* {BEGIN(ARG2); ECHO;}
+<ARG1>:[A-Za-z][A-Za-z0-9]* {
+                                    BEGIN(ARG2);
 
-<ARG2>:[A-Za-z][A-Za-z0-9]* {BEGIN(DEST); ECHO;}
+                                    ECHO;
+                            }
+                            
 
-<DEST>:[A-Za-z][A-Za-z0-9]* {BEGIN(INITIAL); ECHO;}
+<ARG2>:[A-Za-z][A-Za-z0-9]* {
+                                    BEGIN(DEST);
+
+                                    ECHO;
+                            }
+
+
+<DEST>:[A-Za-z][A-Za-z0-9]* {
+                                    BEGIN(INITIAL);
+
+                                    ECHO;
+                            }
+
 
 
 [ \t] {}
@@ -75,5 +90,14 @@ char *arg1 = malloc(sizeof(char)), *arg2 = malloc(sizeof(char)), *dest = malloc(
 
 int main(int ac, char** av)
 {
+    etiquette = malloc(sizeof(char));
+    dest = malloc(sizeof(char));
+    arg1 = malloc(sizeof(char));
+    arg2 = malloc(sizeof(char));
     yylex();
+    free(etiquette);
+    free(dest);
+    free(arg1);
+    free(arg2);
+    return 0;
 }
