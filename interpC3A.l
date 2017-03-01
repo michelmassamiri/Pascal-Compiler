@@ -101,7 +101,7 @@ int main(int ac, char** av)
     arg2 = malloc(sizeof(char));
     yylex();
 
-    ENV environnement = Envalloc();
+    ENV environnement = Envalloc(), envFin = environnement;
     QUAD q = bq.debut, tmpQuad;
     int tmp1, tmp2;
 
@@ -132,6 +132,8 @@ int main(int ac, char** av)
             {
                 e2 = Envalloc();
                 initenv(e2, 0);
+                envFin.SUIV = e2;
+                envFin = e2;
             }
             if(e1 != NULL)
                 e2.VAL = e1.VAL;
@@ -141,24 +143,25 @@ int main(int ac, char** av)
             ENV e = rech(q.DEST, environnement);
             if(e == NULL)
             {
-                initenv(e, q.DEST);
-
+                e = Envalloc();
+                initenv(e, 0);
+                envFin.SUIV = e;
+                envFin = e;
             }
 
             e.VAL = atoi(q.ARG1);
 
         }
-        else if(q.OP == Pl)
+        else if(q.OP == Pl || q.OP == Mu || q.OP == Mo)
         {
-
-        }
-        else if(q.OP == Mu)
-        {
-
-        }
-        else if(q.OP == Mo)
-        {
-
+            ENV e = rech(q.DEST, environnement);
+            if(e == NULL)
+            {
+                e = Envalloc();
+                envFin.SUIV = e;
+                envFin = e;
+            }
+            initenv(e, eval(q.OP, atoi(q.ARG1), atoi(q.ARG2)));
         }
         else if(q.OP == Sk) {;}
 
