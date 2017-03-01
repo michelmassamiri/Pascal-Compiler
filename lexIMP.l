@@ -22,7 +22,7 @@ do                                {return Do;}
 ":="                              {return Af;}
 ";"                               {return Se;}
 [ \t]                             {}
-.                                 {printf("mot no reconnu\n");}
+.                                 {printf("mot non reconnu\n");}
 
 %%
 int main(int argc, char** argv) {

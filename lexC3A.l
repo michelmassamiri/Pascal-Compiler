@@ -12,11 +12,15 @@
 
 %%
 
-<INITIAL>[A-Za-z_][A-Za-z0-9_]* {printf(" initial "); BEGIN(OP); ECHO;}
+<INITIAL>[A-Za-z_][A-Za-z0-9_]* {BEGIN(OP); ECHO;}
+
 <OP>:[A-Za-z]+ {printf(" op ");BEGIN(ARG1); ECHO;}
-<ARG1>:[A-Za-z][A-Za-z0-9]* {printf(" arg1 ");BEGIN(ARG2); ECHO;}
-<ARG2>:[A-Za-z][A-Za-z0-9]* {printf(" arg2 ");BEGIN(DEST); ECHO;}
-<DEST>:[A-Za-z][A-Za-z0-9]* {printf(" dets ");BEGIN(INITIAL); ECHO;}
+
+<ARG1>:[A-Za-z][A-Za-z0-9]* {BEGIN(ARG2); ECHO;}
+
+<ARG2>:[A-Za-z][A-Za-z0-9]* {BEGIN(DEST); ECHO;}
+
+<DEST>:[A-Za-z][A-Za-z0-9]* {BEGIN(INITIAL); ECHO;}
 
 
 [ \t] {}
