@@ -14,7 +14,7 @@ typedef struct {
 
 /* identifiers (Variables) */
 typedef struct {
-    int i;                      /* subscript to sym array */
+    char* v;                      /* string that will be added to sym array */
 } idNodeType;
 
 /* operators */
@@ -34,6 +34,11 @@ typedef struct nodeTypeTag {
     };
 } nodeType;
 
-extern int sym[26];
+extern char* sym[128];
+
+extern int yyerror(char* s);
+nodeType* con(int value);
+nodeType* id(char* v);
+nodeType* opr(int oper, int nops, ...);
 
 #endif
