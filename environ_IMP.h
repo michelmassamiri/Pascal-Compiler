@@ -36,7 +36,7 @@ typedef struct nodeTypeTag {
 
 extern char* sym[128];
 
-extern int yyerror(char* s);
+extern void yyerror(char* s);
 nodeType* con(int value);
 nodeType* id(char* v);
 nodeType* opr(int oper, int nops, ...);
