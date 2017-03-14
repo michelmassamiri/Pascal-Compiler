@@ -4,6 +4,7 @@
 #include <string.h>
 #include "bilquad.h"
 #include "environ.h"
+#include "enum_operation.h"
 
 char *etiquette;
 int operateur;
