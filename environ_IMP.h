@@ -1,3 +1,5 @@
+/* la référence de ce code est le site web suivant : http://epaperpress.com/lexandyacc/calcy.html */
+
 #ifndef ENVIRON_IMP_H
 #define ENVIRON_IMP_H
 
