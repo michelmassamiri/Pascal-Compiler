@@ -1,22 +1,39 @@
 CC=gcc
-CFLAGS:= -std=gnu99
+YACC = bison
+LEX = flex
+CFLAGS:= -std=c99 -Wall
 LDFLAGS:= -lfl
-SRCS = $(wildcard *.l)
-SOURCES = $(wildcard *.c)
-OBJ = $(patsubst %.c,%.o,$(SOURCES))
-OBJL = interpC3A.o#$(patsubst %.l,%.o,$(SRCS))
+PROGS = compilerIMP compilerC3A iimp
 
-PROGS = $(patsubst %.l,%,$(SRCS))
+.PHONY : clean
 
-all: $(PROGS)
+all : $(PROGS)
 
-interC3A : $(OBJ) $(OBJL)
-	$(CC) $(CFLAGS) $? -o $@
-	rm *.o
+%.o : %.c %.h
+		$(CC) $(CFLAGS) -c -o $@ $<
 
-%: %.l
-	flex -o $@.yy.c $<
-	$(CC) $(CFLAGS) -o $@ $@.yy.c $(LDFLAGS)
+iimp.tab.c iimp.tab.h : iimp.y
+											$(YACC) -t -v -d $<
+
+iimp.yy.c : iimp.l iimp.tab.h
+					$(LEX) -o $@ $<
+
+interpC3A.yy.c : interpC3A.l
+								$(LEX) -o $@ $<
+
+compilerIMP : environ_IMP.o bilquad.o iimp.tab.o iimp.yy.o environ.o iimp.tab.c
+						$(CC) $(CFLAGS) -o $@ $^
+
+compilC3A.yy.c : compilC3A.l
+								$(LEX) -o $@ $<
+
+compilerC3A : compilC3A.yy.c bilquad.o environ.o
+						$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+iimp : compilerIMP compilerC3A iimp.c
+					$(CC) $(CFLAGS) -o $@ iimp.c
+
+
 
 clean :
-	rm *.yy.c $(PROGS) interC3A *.o
+			rm -f *.tab.* *.o *.yy.c $(PROGS)
