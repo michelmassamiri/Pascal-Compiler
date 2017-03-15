@@ -44,7 +44,7 @@ nodeType *opr(int oper, int nops, ...) {
     int i;
 
     /* allocate node, extending op array */
-    if ((p = malloc(sizeof(nodeType) + (nops-1) * sizeof(nodetype *))) == NULL)
+    if ((p = malloc(sizeof(nodeType) + (nops-1) * sizeof(nodeType*))) == NULL)
         yyerror("out of memory");
 
     /* copy information */
