@@ -110,7 +110,7 @@ int main(int ac, char** av)
     int sizeofvars = 64, current = 1;
     vars[0] = "Variables\t\t:nop\n";
 
-    printf("                  .pos      0\nINIT      :irmovl Data,     %%edx\n           irmovl 256,      %%eax\n           addl   %%edx,     %%eax\n"
+    printf("                  .pos      0\nINIT      :irmovl Data,     %%edx\n           irmovl 256,      %%eax\n           addl   %%edx,     %%eax\n");
     printf("           rrmovl %%eax,     %%esp\n           rrmovl %%eax,     %%ebp\n");
 
     while(q != NULL)
@@ -225,7 +225,7 @@ int main(int ac, char** av)
         }
 
         q = q.SUIV;
-    \n}
+    }
 
 
     printf("MUL       :nop\n");
@@ -281,8 +281,3 @@ int main(int ac, char** av)
     free(arg2);
     return 0;
 }
-
-
-        rmmovl %eax, eti
-
-eti     : .long 5
