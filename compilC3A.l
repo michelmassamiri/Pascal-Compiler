@@ -17,20 +17,20 @@ BILQUAD bq;
 %option noyywrap
 
 
-%s OP ARG1 ARG2 DEST
+%s OPE ARGU1 ARGU2 DEST
 
 %%
 
 <INITIAL>ET[0-9]* {
-                                    BEGIN(OP);
+                                    BEGIN(OPE);
                                     free(etiquette);
                                     etiquette = malloc(sizeof(char)*yyleng);
                                     strcpy(etiquette, yytext);
                                     ECHO;
                                 }
 
-<OP>:[A-Za-z]+ {
-                                    BEGIN(ARG1);
+<OPE>:[A-Za-z]+ {
+                                    BEGIN(ARGU1);
                                     if(strcmp(yytext+1, "Pl"))
                                         operateur = Pl;
                                     else if(strcmp(yytext+1, "Mo"))
@@ -57,8 +57,8 @@ BILQUAD bq;
                                     ECHO;
                }
 
-<ARG1>:[A-Za-z0-9]* {
-                                    BEGIN(ARG2);
+<ARGU1>:[A-Za-z0-9]* {
+                                    BEGIN(ARGU2);
                                     free(arg1);
                                     arg1 = malloc(sizeof(char)*(yyleng-1));
                                     strcpy(arg1, yytext+1);
@@ -66,7 +66,7 @@ BILQUAD bq;
                     }
 
 
-<ARG2>:[A-Za-z0-9]* {
+<ARGU2>:[A-Za-z0-9]* {
                                     BEGIN(DEST);
                                     free(arg2);
                                     arg2 = malloc(sizeof(char)*(yyleng-1));
@@ -103,41 +103,41 @@ int main(int ac, char** av)
     yylex();
 
     ENV environnement = Envalloc(), envFin = environnement;
-    QUAD q = bq.debut, tmpQuad;
-    int tmp1, tmp2;
+    QUAD q = bq.debut;
+    int tmp1;
 
     char ** vars = malloc(64*sizeof(char*));
     int sizeofvars = 64, current = 1;
     vars[0] = "Variables\t\t:nop\n";
 
-    printf("                  .pos      0\nINIT      :irmovl Data,     %%edx\n           irmovl 256,      %%eax\n           addl   %%edx,     %%eax\n"
+    printf("                  .pos      0\nINIT      :irmovl Data,     %%edx\n           irmovl 256,      %%eax\n           addl   %%edx,     %%eax\n");
     printf("           rrmovl %%eax,     %%esp\n           rrmovl %%eax,     %%ebp\n");
 
     while(q != NULL)
     {
-        if(q.OP == Jp)
+        if(q->OP == Jp)
         {
-            printf("%s\t\t:jmp\t%s\n", q.ETIQ, q.DEST);
+            printf("%s\t\t:jmp\t%s\n", q->ETIQ, q->RES);
         }
-        else if(q.OP == St)
+        else if(q->OP == St)
         {
-            printf("%s\t\t:halt\n", q.ETIQ);
+            printf("%s\t\t:halt\n", q->ETIQ);
         }
-        else if(q.OP == Jz)
+        else if(q->OP == Jz)
         {
-            printf("%s\t\t:irmovl\t%s,\t%%eax\n", q.ETIQ, q.ARG1);
-            printf("\t\tje\t%s\n", q.DEST);
+            printf("%s\t\t:irmovl\t%s,\t%%eax\n", q->ETIQ, q->ARG1);
+            printf("\t\tje\t%s\n", q->RES);
         }
-        else if(q.OP == Af)
+        else if(q->OP == Af)
         {
-            ENV e2 = rech(q.ARG2, environnement);
-            ENV e1 = rech(q.ARG1, environnement);
+            ENV e2 = rech(q->ARG2, environnement);
+            ENV e1 = rech(q->ARG1, environnement);
 
             if(e2 == NULL)
             {
                 e2 = Envalloc();
-                initenv(e2, 0);
-                envFin.SUIV = e2;
+                initenv(&e2, q->ARG2);
+                envFin->SUIV = e2;
                 envFin = e2;
 
                 if(current == sizeofvars)
@@ -146,22 +146,22 @@ int main(int ac, char** av)
                     sizeofvars*= 2;
                 }
 
-                vars[current++] = q.ARG2 + "\t\t: .long 0";
+                vars[current++] = strncat(q->ARG2, "\t\t: .long 0", 10);
             }
             if(e1 != NULL)
             {
-                printf("%s\t\t:mrmovl\t%%eax,\t(%s)\n", q.ETIQ ,q.ARG1);
-                printf("\t\trmmovl\t%%eax,\t0(%s)\n", q.ARG2);
+                printf("%s\t\t:mrmovl\t%%eax,\t(%s)\n", q->ETIQ ,q->ARG1);
+                printf("\t\trmmovl\t%%eax,\t0(%s)\n", q->ARG2);
             }
         }
-        else if(q.OP == Afc)
+        else if(q->OP == Afc)
         {
-            ENV e = rech(q.DEST, environnement);
+            ENV e = rech(q->RES, environnement);
             if(e == NULL)
             {
                 e = Envalloc();
-                initenv(e, 0);
-                envFin.SUIV = e;
+                initenv(&e, q->RES);
+                envFin->SUIV = e;
                 envFin = e;
 
                 if(current == sizeofvars)
@@ -170,23 +170,24 @@ int main(int ac, char** av)
                     sizeofvars*= 2;
                 }
 
-                vars[current++] = q.DEST + "\t\t: .long " + q.ARG1;
+                vars[current++] = strncat(strncat(q->RES, "\t\t: .long ", 10), q->ARG1, 10);
             }
             else
             {
-                printf("%s\t\t:irmovl\t%s,\t%%eax\n", q.ETIQ, q.ARG1);
-                printf("\t\trmmovl\t%%eax,\t0(%s)\n", q.DEST);
+                printf("%s\t\t:irmovl\t%s,\t%%eax\n", q->ETIQ, q->ARG1);
+                printf("\t\trmmovl\t%%eax,\t0(%s)\n", q->RES);
             }
         }
-        else if(q.OP == Pl || q.OP == Mu || q.OP == Mo)
+        else if(q->OP == Pl || q->OP == Mu || q->OP == Mo)
         {
-            ENV e = rech(q.DEST, environnement);
+            ENV e = rech(q->RES, environnement);
             if(e == NULL)
             {
                 e = Envalloc();
-                envFin.SUIV = e;
+                envFin->SUIV = e;
                 envFin = e;
-                initenv(e, eval(q.OP, atoi(q.ARG1), atoi(q.ARG2)));
+                initenv(&e, q->RES);
+                e->VAL = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2));
 
                 if(current == sizeofvars)
                 {
@@ -194,16 +195,16 @@ int main(int ac, char** av)
                     sizeofvars*= 2;
                 }
 
-                vars[current++] = q.ARG2 + "\t\t: .long " + e->VAL;
+                vars[current++] = strncat(q->ARG2, "\t\t: .long 0", 11);
             }
-            e->VAl = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2);
-            printf("%s\t\t:irmovl\t%s,\t%%eax\n", q.ETIQ, q.ARG1);
-            printf("\t\tirmovl\t%s,\t%%ebx\n", q.ARG2);
-            if(q.OP == pl)
+            e->VAL = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2));
+            printf("%s\t\t:irmovl\t%s,\t%%eax\n", q->ETIQ, q->ARG1);
+            printf("\t\tirmovl\t%s,\t%%ebx\n", q->ARG2);
+            if(q->OP == Pl)
             {
                 printf("\t\taddl\t%%eax,\t%%ebx\n");
             }
-            else if(q.op == Mo)
+            else if(q->OP == Mo)
             {
                 printf("\t\tsubl\t%%eax,\t%%ebx\n");
             }
@@ -215,17 +216,17 @@ int main(int ac, char** av)
                 printf("\t\tpopl\t%%eax\n");
                 printf("\t\tpopl\t%%ebx\n");
                 printf("\t\tmrmovl\t0(%%edx)\t%%ebx\n");
-                printf("\t\trmmovl\t%%ebx\t0(%s)\n", q.DEST);
+                printf("\t\trmmovl\t%%ebx\t0(%s)\n", q->RES);
             }
-            printf("\t\trmmovl\t%%ebx,\t0(%s)\n", q.DEST);
+            printf("\t\trmmovl\t%%ebx,\t0(%s)\n", q->RES);
         }
-        else if(q.OP == Sk)
+        else if(q->OP == Sk)
         {
-            printf("%s\t\t:nop\n", q.ETIQ);
+            printf("%s\t\t:nop\n", q->ETIQ);
         }
 
-        q = q.SUIV;
-    \n}
+        q = q->SUIV;
+    }
 
 
     printf("MUL       :nop\n");
@@ -281,8 +282,3 @@ int main(int ac, char** av)
     free(arg2);
     return 0;
 }
-
-
-        rmmovl %eax, eti
-
-eti     : .long 5
