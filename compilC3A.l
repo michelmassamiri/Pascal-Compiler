@@ -209,7 +209,13 @@ int main(int ac, char** av)
             }
             else
             {
-
+                printf("\t\tpushl\t%%ebx\n");
+                printf("\t\tpushl\t%%eax\n");
+                printf("\t\tcall\tMUL\n");
+                printf("\t\tpopl\t%%eax\n");
+                printf("\t\tpopl\t%%ebx\n");
+                printf("\t\tmrmovl\t0(%%edx)\t%%ebx\n");
+                printf("\t\trmmovl\t%%ebx\t0(%s)\n", q.DEST);
             }
             printf("\t\trmmovl\t%%ebx,\t0(%s)\n", q.DEST);
         }
