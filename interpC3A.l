@@ -171,6 +171,8 @@ int main(int ac, char** av)
     }
 
 
+    ecrire_env(environnement);
+
     free(etiquette);
     free(dest);
     free(arg1);
