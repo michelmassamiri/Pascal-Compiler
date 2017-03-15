@@ -125,12 +125,8 @@ int main(int ac, char** av)
         }
         else if(q.OP == Jz)
         {
-            tmp1 = atoi(arg1);
-            if(arg1 == 0)
-            {
-                q = rechbq(q.DEST, bq);
-                continue;
-            }
+            printf("%s\t\t:irmovl\t%s,\t%%eax\n", q.ETIQ, q.ARG1);
+            printf("\t\tje\t%s\n", q.DEST);
         }
         else if(q.OP == Af)
         {
@@ -143,9 +139,20 @@ int main(int ac, char** av)
                 initenv(e2, 0);
                 envFin.SUIV = e2;
                 envFin = e2;
+
+                if(current == sizeofvars)
+                {
+                    vars = realloc(vars, 2*sizeofvars *sizeof(char*));
+                    sizeofvars*= 2;
+                }
+
+                vars[current++] = q.ARG2 + "\t\t: .long 0";
             }
             if(e1 != NULL)
-                e2.VAL = e1.VAL;
+            {
+                printf("%s\t\t:mrmovl\t%%eax,\t(%s)\n", q.ETIQ ,q.ARG1);
+                printf("\t\trmmovl\t%%eax,\t(%s)\n", q.ARG2);
+            }
         }
         else if(q.OP == Afc)
         {
@@ -156,12 +163,20 @@ int main(int ac, char** av)
                 initenv(e, 0);
                 envFin.SUIV = e;
                 envFin = e;
+
+                if(current == sizeofvars)
+                {
+                    vars = realloc(vars, 2*sizeofvars *sizeof(char*));
+                    sizeofvars*= 2;
+                }
+
+                vars[current++] = q.DEST + "\t\t: .long " + q.ARG1;
             }
-
-            e.VAL = atoi(q.ARG1);
-
-            current++;
-
+            else
+            {
+                printf("%s\t\t:irmovl\t%s,\t%%eax\n", q.ETIQ, q.ARG1);
+                printf("\t\tmrmovl\t%%eax,\t(%s)\n", q.DEST);
+            }
         }
         else if(q.OP == Pl || q.OP == Mu || q.OP == Mo)
         {
@@ -194,3 +209,8 @@ int main(int ac, char** av)
     free(arg2);
     return 0;
 }
+
+
+        rmmovl %eax, eti
+
+eti     : .long 5

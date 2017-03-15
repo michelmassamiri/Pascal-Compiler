@@ -108,65 +108,65 @@ int main(int ac, char** av)
 
     while(q != NULL)
     {
-        if(q.OP == Jp)
+        if(q->OP == Jp)
         {
-            q = rechbq(q.DEST, bq);
+            q = rechbq(q->RES, bq);
             continue;
         }
-        else if(q.OP == St)
+        else if(q->OP == St)
             break;
-        else if(q.OP == Jz)
+        else if(q->OP == Jz)
         {
-            tmp1 = atoi(arg1);
+            tmp1 = atoi(q->ARG1);
             if(arg1 == 0)
             {
-                q = rechbq(q.DEST, bq);
+                q = rechbq(q->RES, bq);
                 continue;
             }
         }
-        else if(q.OP == Af)
+        else if(q->OP == Af)
         {
-            ENV e2 = rech(q.ARG2, environnement);
-            ENV e1 = rech(q.ARG1, environnement);
+            ENV e2 = rech(q->ARG2, environnement);
+            ENV e1 = rech(q->ARG1, environnement);
 
             if(e2 == NULL)
             {
                 e2 = Envalloc();
                 initenv(e2, 0);
-                envFin.SUIV = e2;
+                envFin->SUIV = e2;
                 envFin = e2;
             }
             if(e1 != NULL)
-                e2.VAL = e1.VAL;
+                e1->VAL = e1->VAL;
         }
-        else if(q.OP == Afc)
+        else if(q->OP == Afc)
         {
-            ENV e = rech(q.DEST, environnement);
+            ENV e = rech(q->RES, environnement);
             if(e == NULL)
             {
                 e = Envalloc();
                 initenv(e, 0);
-                envFin.SUIV = e;
+                envFin->SUIV = e;
                 envFin = e;
             }
 
-            e.VAL = atoi(q.ARG1);
+            e->VAL = atoi(q->ARG1);
 
         }
-        else if(q.OP == Pl || q.OP == Mu || q.OP == Mo)
+        else if(q->OP == Pl || q->OP == Mu || q->OP == Mo)
         {
-            ENV e = rech(q.DEST, environnement);
+            ENV e = rech(q->RES, environnement);
             if(e == NULL)
             {
                 e = Envalloc();
-                envFin.SUIV = e;
+                envFin->SUIV = e;
                 envFin = e;
             }
-            initenv(e, eval(q.OP, atoi(q.ARG1), atoi(q.ARG2)));
+            initenv(e, eval(q->OP, atoi(q->ARG1), atoi(q->ARG2)));
         }
-        else if(q.OP == Sk) {;}
+        else if(q->OP == Sk) {;}
 
-        q = q.SUIV;
+        q = q->SUIV;
     }
 
 
