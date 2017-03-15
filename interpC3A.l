@@ -161,8 +161,9 @@ int main(int ac, char** av)
                 e = Envalloc();
                 envFin->SUIV = e;
                 envFin = e;
+                initenv(e, eval(q->OP, atoi(q->ARG1), atoi(q->ARG2)));
             }
-            initenv(e, eval(q->OP, atoi(q->ARG1), atoi(q->ARG2)));
+            e->VAl = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2);
         }
         else if(q->OP == Sk) {;}
 

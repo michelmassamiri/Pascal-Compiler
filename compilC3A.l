@@ -108,7 +108,7 @@ int main(int ac, char** av)
 
     char ** vars = malloc(64*sizeof(char*));
     int sizeofvars = 64, current = 1;
-    vars[0] = "Data\t\t:nop\n";
+    vars[0] = "Variables\t\t:nop\n";
 
     printf("                  .pos      0\nINIT      :irmovl Data,     %%edx\n           irmovl 256,      %%eax\n           addl   %%edx,     %%eax\n"
     printf("           rrmovl %%eax,     %%esp\n           rrmovl %%eax,     %%ebp\n");
@@ -151,7 +151,7 @@ int main(int ac, char** av)
             if(e1 != NULL)
             {
                 printf("%s\t\t:mrmovl\t%%eax,\t(%s)\n", q.ETIQ ,q.ARG1);
-                printf("\t\trmmovl\t%%eax,\t(%s)\n", q.ARG2);
+                printf("\t\trmmovl\t%%eax,\t0(%s)\n", q.ARG2);
             }
         }
         else if(q.OP == Afc)
@@ -175,7 +175,7 @@ int main(int ac, char** av)
             else
             {
                 printf("%s\t\t:irmovl\t%s,\t%%eax\n", q.ETIQ, q.ARG1);
-                printf("\t\tmrmovl\t%%eax,\t(%s)\n", q.DEST);
+                printf("\t\trmmovl\t%%eax,\t0(%s)\n", q.DEST);
             }
         }
         else if(q.OP == Pl || q.OP == Mu || q.OP == Mo)
@@ -186,8 +186,32 @@ int main(int ac, char** av)
                 e = Envalloc();
                 envFin.SUIV = e;
                 envFin = e;
+                initenv(e, eval(q.OP, atoi(q.ARG1), atoi(q.ARG2)));
+
+                if(current == sizeofvars)
+                {
+                    vars = realloc(vars, 2*sizeofvars *sizeof(char*));
+                    sizeofvars*= 2;
+                }
+
+                vars[current++] = q.ARG2 + "\t\t: .long " + e->VAL;
             }
-            initenv(e, eval(q.OP, atoi(q.ARG1), atoi(q.ARG2)));
+            e->VAl = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2);
+            printf("%s\t\t:irmovl\t%s,\t%%eax\n", q.ETIQ, q.ARG1);
+            printf("\t\tirmovl\t%s,\t%%ebx\n", q.ARG2);
+            if(q.OP == pl)
+            {
+                printf("\t\taddl\t%%eax,\t%%ebx\n");
+            }
+            else if(q.op == Mo)
+            {
+                printf("\t\tsubl\t%%eax,\t%%ebx\n");
+            }
+            else
+            {
+
+            }
+            printf("\t\trmmovl\t%%ebx,\t0(%s)\n", q.DEST);
         }
         else if(q.OP == Sk)
         {
@@ -195,12 +219,54 @@ int main(int ac, char** av)
         }
 
         q = q.SUIV;
-    }
+    \n}
+
+
+    printf("MUL       :nop\n");
+    printf("           mrmovl 4(%%esp),  %%eax\n");
+    printf("           mrmovl 8(%%esp),  %%ebx\n");
+    printf("           andl   %%eax,     %%eax\n");
+    printf("           je     END\n");
+    printf("SIGN      :nop\n");
+    printf("           jg     MULPLUS\n");
+    printf("           irmovl 0,        %%ecx\n");
+    printf("           subl   %%eax,     %%ecx\n");
+    printf("           rrmovl %%ecx,     %%eax\n");
+    printf("           rmmovl %%eax,     4(%%esp)\n");
+    printf("           irmovl 0,        %%ecx\n");
+    printf("           subl   %%ebx,     %%ecx\n");
+    printf("           rrmovl %%ecx,     %%ebx\n");
+    printf("           rmmovl %%ebx,     8(%%esp)\n");
+    printf("MULPLUS   :nop\n");
+    printf("           mrmovl 4(%%esp),  %%eax\n");
+    printf("           andl   %%eax,     %%eax\n");
+    printf("           je     END\n");
+    printf("           irmovl 1,        %%esi\n");
+    printf("           subl   %%esi,     %%eax\n");
+    printf("           mrmovl 8(%%esp),  %%ebx\n");
+    printf("           pushl  %%ebx\n");
+    printf("           pushl  %%eax\n");
+    printf("           call   MULPLUS\n");
+    printf("           popl   %%eax\n");
+    printf("           popl   %%eax\n");
+    printf("           mrmovl 0(%%edx),  %%eax\n");
+    printf("           mrmovl 8(%%esp),  %%ebx\n");
+    printf("           addl   %%ebx,     %%eax\n");
+    printf("           rmmovl %%eax,     0(%%edx)\n");
+    printf("           ret\n");
+    printf("END       :irmovl 0,        %%eax\n");
+    printf("           rmmovl %%eax,     0(%%edx)\n");
+    printf("           ret\n");
+    printf("           .align 8\n");
+
+
 
     for(int i = 0; i < sizeofvars; ++i)
     {
-        printf("%s", vars[i]);
+        printf("%s\n", vars[i]);
     }
+    printf("Data\t\t:\n");
+    printf("           .align 8");
 
     free(vars);
     free(etiquette);
