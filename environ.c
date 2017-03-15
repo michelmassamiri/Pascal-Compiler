@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "environ.h"
+#include "enum_operation.h"
 /*---------------------allocation memoire----------------------------*/
 char *Idalloc()
 {
@@ -52,7 +53,7 @@ int eval(int op, int arg1, int arg2)
     }
   return(0);
 }
- 
+
 /* retourne l'adresse de la cellule contenant chaine. NULL si la chaine est absente */
 ENV rech(char *chaine, ENV listident)
 {if (listident!=NULL)
@@ -77,14 +78,14 @@ int affect(ENV rho, char *var, int val)
     return(EXIT_FAILURE);
 }
 
-/* affiche l'environnement */  
+/* affiche l'environnement */
 int ecrire_env(ENV rho)
 { if (rho==NULL)
     {printf("fin d' environnement \n");
       return(EXIT_SUCCESS);}
   else
     {printf("variable %s valeur %d \n",rho->ID,rho->VAL);
-      ecrire_env(rho->SUIV); 
+      ecrire_env(rho->SUIV);
       return(EXIT_SUCCESS);
     };
 }
@@ -98,5 +99,3 @@ int valch(ENV rho, char *var)
   else
     return(0);
 }
-
-
