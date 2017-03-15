@@ -17,20 +17,20 @@ BILQUAD bq;
 %option noyywrap
 
 
-%s OP ARG1 ARG2 DEST
+%s OPE ARGU1 ARGU2 DEST
 
 %%
 
 <INITIAL>ET[0-9]* {
-                                    BEGIN(OP);
+                                    BEGIN(OPE);
                                     free(etiquette);
                                     etiquette = malloc(sizeof(char)*yyleng);
                                     strcpy(etiquette, yytext);
                                     ECHO;
                                 }
 
-<OP>:[A-Za-z]+ {
-                                    BEGIN(ARG1);
+<OPE>:[A-Za-z]+ {
+                                    BEGIN(ARGU1);
                                     if(strcmp(yytext+1, "Pl"))
                                         operateur = Pl;
                                     else if(strcmp(yytext+1, "Mo"))
@@ -57,8 +57,8 @@ BILQUAD bq;
                                     ECHO;
                }
 
-<ARG1>:[A-Za-z0-9]* {
-                                    BEGIN(ARG2);
+<ARGU1>:[A-Za-z0-9]* {
+                                    BEGIN(ARGU2);
                                     free(arg1);
                                     arg1 = malloc(sizeof(char)*(yyleng-1));
                                     strcpy(arg1, yytext+1);
@@ -66,7 +66,7 @@ BILQUAD bq;
                     }
 
 
-<ARG2>:[A-Za-z0-9]* {
+<ARGU2>:[A-Za-z0-9]* {
                                     BEGIN(DEST);
                                     free(arg2);
                                     arg2 = malloc(sizeof(char)*(yyleng-1));
@@ -103,8 +103,8 @@ int main(int ac, char** av)
     yylex();
 
     ENV environnement = Envalloc(), envFin = environnement;
-    QUAD q = bq.debut, tmpQuad;
-    int tmp1, tmp2;
+    QUAD q = bq.debut;
+    int tmp1;
 
     while(q != NULL)
     {
@@ -118,7 +118,7 @@ int main(int ac, char** av)
         else if(q->OP == Jz)
         {
             tmp1 = atoi(q->ARG1);
-            if(arg1 == 0)
+            if(tmp1 == 0)
             {
                 q = rechbq(q->RES, bq);
                 continue;
@@ -132,12 +132,12 @@ int main(int ac, char** av)
             if(e2 == NULL)
             {
                 e2 = Envalloc();
-                initenv(e2, 0);
+                initenv(&e2, q->ARG2);
                 envFin->SUIV = e2;
                 envFin = e2;
             }
             if(e1 != NULL)
-                e1->VAL = e1->VAL;
+                e1->VAL = e2->VAL;
         }
         else if(q->OP == Afc)
         {
@@ -145,7 +145,7 @@ int main(int ac, char** av)
             if(e == NULL)
             {
                 e = Envalloc();
-                initenv(e, 0);
+                initenv(&e, q->ARG1);
                 envFin->SUIV = e;
                 envFin = e;
             }
@@ -161,9 +161,9 @@ int main(int ac, char** av)
                 e = Envalloc();
                 envFin->SUIV = e;
                 envFin = e;
-                initenv(e, eval(q->OP, atoi(q->ARG1), atoi(q->ARG2)));
+                initenv(&e, q->RES);
             }
-            e->VAl = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2);
+            e->VAL = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2));
         }
         else if(q->OP == Sk) {;}
 

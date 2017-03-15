@@ -3,7 +3,7 @@ YACC = bison
 LEX = flex
 CFLAGS:= -std=c99 -Wall
 LDFLAGS:= -lfl
-PROGS = compilerIMP compilerC3A iimp
+PROGS = compilerIMP compilerC3A iimp interpC3A
 
 .PHONY : clean
 
