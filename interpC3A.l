@@ -127,16 +127,9 @@ int main(int ac, char** av)
         }
         else if(q->OP == Af)
         {
-            ENV e2 = rech(q->ARG2, environnement);
-            ENV e1 = rech(q->ARG1, environnement);
-
-            if(e2 == NULL)
-            {
-                initenv(&environnement, q->ARG2);
-                e2 = rech(q->ARG2, environnement);
-            }
-            if(e1 != NULL)
-                e1->VAL = e2->VAL;
+            if(rech(q->ARG1, environnement) == NULL)
+                initenv(&environnement, q->ARG1);
+            affect(environnement, q->ARG1, valch(environnement, q->ARG2));
         }
         else if(q->OP == Afc)
         {
@@ -146,13 +139,9 @@ int main(int ac, char** av)
         }
         else if(q->OP == Pl || q->OP == Mu || q->OP == Mo)
         {
-            ENV e = rech(q->RES, environnement);
-            if(e == NULL)
-            {
+            if(rech(q->RES, environnement) == NULL)
                 initenv(&environnement, q->RES);
-                e = rech(q->RES, environnement);
-            }
-            e->VAL = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2));
+            affect(environnement, q->RES, eval(q->OP, valch(environnement, q->ARG1), valch(environnement, q->ARG2)));
         }
         else if(q->OP == Sk) {;}
         else{
