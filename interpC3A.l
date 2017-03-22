@@ -105,9 +105,8 @@ int main(int ac, char** av)
 
     yylex();
 
-    ENV environnement = Envalloc();
+    ENV environnement = NULL;
     QUAD q = bq.debut;
-    int tmp1;
 
     while(q != NULL)
     {
@@ -120,8 +119,7 @@ int main(int ac, char** av)
             break;
         else if(q->OP == Jz)
         {
-            tmp1 = atoi(q->ARG1);
-            if(tmp1 == 0)
+            if(valch(environnement, q->ARG1) == 0)
             {
                 q = rechbq(q->RES, bq);
                 continue;
@@ -142,15 +140,9 @@ int main(int ac, char** av)
         }
         else if(q->OP == Afc)
         {
-            ENV e = rech(q->RES, environnement);
-            if(e == NULL)
-            {
+            if(rech(q->RES, environnement) == NULL)
                 initenv(&environnement, q->RES);
-                e = rech(q->RES, environnement);
-            }
-
-            e->VAL = atoi(q->ARG1);
-
+            affect(environnement, q->RES, atoi(q->ARG1));
         }
         else if(q->OP == Pl || q->OP == Mu || q->OP == Mo)
         {
@@ -172,6 +164,7 @@ int main(int ac, char** av)
 
 
     ecrire_env(environnement);
+
 
     free(etiquette);
     free(dest);
