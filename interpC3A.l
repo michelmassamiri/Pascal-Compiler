@@ -7,7 +7,7 @@
 #include "enum_operation.h"
 
 char *etiquette;
-int operateur;
+int operateur = 0;
 char *arg1, *arg2, *dest;
 
 BILQUAD bq;
@@ -21,6 +21,8 @@ BILQUAD bq;
 
 %%
 
+"exit"  { return 0;}
+
 <INITIAL>ET[0-9]* {
                                     BEGIN(OPE);
                                     free(etiquette);
@@ -31,23 +33,23 @@ BILQUAD bq;
 
 <OPE>:[A-Za-z]+ {
                                     BEGIN(ARGU1);
-                                    if(strcmp(yytext+1, "Pl"))
+                                    if(strcmp(yytext+1, "Pl") == 0)
                                         operateur = Pl;
-                                    else if(strcmp(yytext+1, "Mo"))
+                                    else if(strcmp(yytext+1, "Mo") == 0)
                                         operateur = Mo;
-                                    else if(strcmp(yytext+1, "Mu"))
+                                    else if(strcmp(yytext+1, "Mu") == 0)
                                         operateur = Mu;
-                                    else if(strcmp(yytext+1, "Af"))
+                                    else if(strcmp(yytext+1, "Af") == 0)
                                         operateur = Af;
-                                    else if(strcmp(yytext+1, "Afc"))
+                                    else if(strcmp(yytext+1, "Afc") == 0)
                                         operateur = Afc;
-                                    else if(strcmp(yytext+1, "Sk"))
+                                    else if(strcmp(yytext+1, "Sk") == 0)
                                         operateur = Sk;
-                                    else if(strcmp(yytext+1, "Jp"))
+                                    else if(strcmp(yytext+1, "Jp") == 0)
                                         operateur = Jp;
-                                    else if(strcmp(yytext+1, "Jz"))
+                                    else if(strcmp(yytext+1, "Jz") == 0)
                                         operateur = Jz;
-                                    else if(strcmp(yytext+1, "St"))
+                                    else if(strcmp(yytext+1, "St") == 0)
                                         operateur = St;
                                     else
                                     {
@@ -100,9 +102,10 @@ int main(int ac, char** av)
     dest = malloc(sizeof(char));
     arg1 = malloc(sizeof(char));
     arg2 = malloc(sizeof(char));
+
     yylex();
 
-    ENV environnement = Envalloc(), envFin = environnement;
+    ENV environnement = Envalloc();
     QUAD q = bq.debut;
     int tmp1;
 
@@ -131,10 +134,8 @@ int main(int ac, char** av)
 
             if(e2 == NULL)
             {
-                e2 = Envalloc();
-                initenv(&e2, q->ARG2);
-                envFin->SUIV = e2;
-                envFin = e2;
+                initenv(&environnement, q->ARG2);
+                e2 = rech(q->ARG2, environnement);
             }
             if(e1 != NULL)
                 e1->VAL = e2->VAL;
@@ -144,10 +145,8 @@ int main(int ac, char** av)
             ENV e = rech(q->RES, environnement);
             if(e == NULL)
             {
-                e = Envalloc();
-                initenv(&e, q->ARG1);
-                envFin->SUIV = e;
-                envFin = e;
+                initenv(&environnement, q->RES);
+                e = rech(q->RES, environnement);
             }
 
             e->VAL = atoi(q->ARG1);
@@ -158,15 +157,16 @@ int main(int ac, char** av)
             ENV e = rech(q->RES, environnement);
             if(e == NULL)
             {
-                e = Envalloc();
-                envFin->SUIV = e;
-                envFin = e;
-                initenv(&e, q->RES);
+                initenv(&environnement, q->RES);
+                e = rech(q->RES, environnement);
             }
             e->VAL = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2));
         }
         else if(q->OP == Sk) {;}
-
+        else{
+            printf("error\n");
+            return 0;
+        }
         q = q->SUIV;
     }
 

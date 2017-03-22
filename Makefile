@@ -1,7 +1,7 @@
 CC=gcc
 YACC = bison
 LEX = flex
-CFLAGS:= -std=gnu99
+CFLAGS:= -std=gnu99 -g
 LDFLAGS:= -lfl
 PROGS = compilerIMP compilerC3A interpC3A interpIMP
 
