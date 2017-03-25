@@ -6,6 +6,7 @@
 
   #include "environ_IMP.h"
   #include "environ.h"
+  
   extern int yyerror(char*);
   extern int yylex();
 
@@ -24,10 +25,11 @@
 //tokens definissant des symboles
 %token  '(' ')' '[' ']' '{' '}' Se ','
 //Token definissant des mots cles
-%token If Th El Wh Do Sk T_bool T_int T_array
+%token If Th El Wh Do Sk T_bool T_int T_array Def Dep NewAr NFon NPro Var
 //Token definissant les symboles et chaines utilisateur
 %token <iValue> I
 %token <id> V
+%token True False
 
 
 %%

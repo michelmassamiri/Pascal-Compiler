@@ -4,6 +4,8 @@
   #include "environ_IMP.h"
 
   #include "interpPP.tab.h"
+
+  int value = V;
 %}
 
 %option noyywrap
@@ -11,7 +13,6 @@
 /* Declare tokens */
 %%
 
-//operateurs
 "+" { return Pl; }
 "-" { return Mo; }
 "*" { return Mu; }
@@ -22,11 +23,11 @@
 "<" { return Lt ;}
 "=" { return Eq; }
 
-//symboles
+
 "(" | ")" | "[" | "]" | "{" | "}" | "," { return *yytext; }
 ";" { return Se; }
 
-//Mots Cles
+
 "if" { return If; }
 "then" { return Th; }
 "else" { return El; }
@@ -35,13 +36,22 @@
 "skip" { return Sk; }
 "bool" { return T_bool; }
 "int" { return T_int; }
+"new array of" { return NewAr; }
 "array of" { return T_array; }
+"defun" { value = NFon; return Def; }
+"depro" { value = NPro; return Dep; }
+"var" { return Var; }
 
-//utilisateur
+
+
+"true" { return True; }
+"false" { return False; }
 [1-9][0-9]* { yylval.iValue = atoi(yytext); return I; }
-[A-Za-z_][A-Za-z0-9_]* { yylval.id = strdup(yytext); return V; }
+[A-Za-z_][A-Za-z0-9_]* { yylval.id = strdup(yytext); int v = value; value = V; return v; }
 
-//autres
+
+
+
 [ \t\n] {;}
 . { return *yytext; }
 %%
