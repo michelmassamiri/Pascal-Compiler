@@ -11,6 +11,14 @@
 
 %}
 
+
+%union{
+    int iValue; // the value of the constant
+    char* id; // the variable string
+    nodeType* p; // the node type
+};
+
+
 //tokens definissant des operateurs
 %token Pl Mo Mu Or Lt Eq And Not Af
 //tokens definissant des symboles
@@ -18,7 +26,9 @@
 //Token definissant des mots cles
 %token If Th El Wh Do Sk T_bool T_int T_array
 //Token definissant les symboles et chaines utilisateur
-%token I V
+%token <iValue> I
+%token <id> V
+
 
 %%
 

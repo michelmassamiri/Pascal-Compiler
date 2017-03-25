@@ -23,7 +23,7 @@
 "=" { return Eq; }
 
 //symboles
-"(" | ")" | "[" | "]" | "{" | "}" | "," { return yytext; }
+"(" | ")" | "[" | "]" | "{" | "}" | "," { return *yytext; }
 ";" { return Se; }
 
 //Mots Cles
@@ -38,7 +38,10 @@
 "array of" { return T_array; }
 
 //utilisateur
-[1-9][0-9]* { return I; }
-[A-Za-z_][A-Za-z0-9_]* { return V; }
+[1-9][0-9]* { yylval.iValue = atoi(yytext); return I; }
+[A-Za-z_][A-Za-z0-9_]* { yylval.id = strdup(yytext); return V; }
 
+//autres
+[ \t\n] {;}
+. { return *yytext; }
 %%
