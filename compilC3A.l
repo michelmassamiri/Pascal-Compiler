@@ -21,6 +21,8 @@ BILQUAD bq;
 
 %%
 
+"exit" { return 0; }
+
 <INITIAL>ET[0-9]* {
                                     BEGIN(OPE);
                                     free(etiquette);
@@ -31,23 +33,23 @@ BILQUAD bq;
 
 <OPE>:[A-Za-z]+ {
                                     BEGIN(ARGU1);
-                                    if(strcmp(yytext+1, "Pl"))
+                                    if(strcmp(yytext+1, "Pl") == 0)
                                         operateur = Pl;
-                                    else if(strcmp(yytext+1, "Mo"))
+                                    else if(strcmp(yytext+1, "Mo") == 0)
                                         operateur = Mo;
-                                    else if(strcmp(yytext+1, "Mu"))
+                                    else if(strcmp(yytext+1, "Mu") == 0)
                                         operateur = Mu;
-                                    else if(strcmp(yytext+1, "Af"))
+                                    else if(strcmp(yytext+1, "Af") == 0)
                                         operateur = Af;
-                                    else if(strcmp(yytext+1, "Afc"))
+                                    else if(strcmp(yytext+1, "Afc") == 0)
                                         operateur = Afc;
-                                    else if(strcmp(yytext+1, "Sk"))
+                                    else if(strcmp(yytext+1, "Sk") == 0)
                                         operateur = Sk;
-                                    else if(strcmp(yytext+1, "Jp"))
+                                    else if(strcmp(yytext+1, "Jp") == 0)
                                         operateur = Jp;
-                                    else if(strcmp(yytext+1, "Jz"))
+                                    else if(strcmp(yytext+1, "Jz") == 0)
                                         operateur = Jz;
-                                    else if(strcmp(yytext+1, "St"))
+                                    else if(strcmp(yytext+1, "St") == 0)
                                         operateur = St;
                                     else
                                     {
@@ -94,6 +96,15 @@ BILQUAD bq;
 
 %%
 
+void checkVar(int current, int sizeofvars, char**vars)
+{
+    if(current == sizeofvars)
+    {
+        vars = realloc(vars, 2*sizeofvars *sizeof(char*));
+        sizeofvars*= 2;
+    }
+}
+
 int main(int ac, char** av)
 {
     etiquette = malloc(sizeof(char));
@@ -102,13 +113,13 @@ int main(int ac, char** av)
     arg2 = malloc(sizeof(char));
     yylex();
 
-    ENV environnement = Envalloc(), envFin = environnement;
+    ENV environnement = NULL, envFin = environnement;
     QUAD q = bq.debut;
     int tmp1;
 
     char ** vars = malloc(64*sizeof(char*));
     int sizeofvars = 64, current = 1;
-    vars[0] = "Variables\t\t:nop\n";
+    vars[0] = "Variables\t:nop\n";
 
     printf("                  .pos      0\nINIT      :irmovl Data,     %%edx\n           irmovl 256,      %%eax\n           addl   %%edx,     %%eax\n");
     printf("           rrmovl %%eax,     %%esp\n           rrmovl %%eax,     %%ebp\n");
@@ -130,46 +141,21 @@ int main(int ac, char** av)
         }
         else if(q->OP == Af)
         {
-            ENV e2 = rech(q->ARG2, environnement);
-            ENV e1 = rech(q->ARG1, environnement);
-
-            if(e2 == NULL)
+            if(rech(q->ARG1, environnement) == NULL)
             {
-                e2 = Envalloc();
-                initenv(&e2, q->ARG2);
-                envFin->SUIV = e2;
-                envFin = e2;
-
-                if(current == sizeofvars)
-                {
-                    vars = realloc(vars, 2*sizeofvars *sizeof(char*));
-                    sizeofvars*= 2;
-                }
-
+                initenv(&environnement, q->ARG1);
+                checkVar(current, sizeofvars, vars);
                 vars[current++] = strncat(q->ARG2, "\t\t: .long 0", 10);
             }
-            if(e1 != NULL)
-            {
-                printf("%s\t\t:mrmovl\t%%eax,\t(%s)\n", q->ETIQ ,q->ARG1);
-                printf("\t\trmmovl\t%%eax,\t0(%s)\n", q->ARG2);
-            }
+            printf("%s\t\t:mrmovl\t%%eax,\t(%s)\n", q->ETIQ ,q->ARG1);
+            printf("\t\trmmovl\t%%eax,\t0(%s)\n", q->ARG2);
         }
         else if(q->OP == Afc)
         {
-            ENV e = rech(q->RES, environnement);
-            if(e == NULL)
+            if(rech(q->RES, environnement) == NULL)
             {
-                e = Envalloc();
-                initenv(&e, q->RES);
-                envFin->SUIV = e;
-                envFin = e;
-
-                if(current == sizeofvars)
-                {
-                    vars = realloc(vars, 2*sizeofvars *sizeof(char*));
-                    sizeofvars*= 2;
-                }
-
+                initenv(&environnement, q->RES);
+                checkVar(current, sizeofvars, vars);
                 vars[current++] = strncat(strncat(q->RES, "\t\t: .long ", 10), q->ARG1, 10);
             }
             else
@@ -180,24 +166,12 @@ int main(int ac, char** av)
         }
         else if(q->OP == Pl || q->OP == Mu || q->OP == Mo)
         {
-            ENV e = rech(q->RES, environnement);
-            if(e == NULL)
+            if(rech(q->RES, environnement) == NULL)
             {
-                e = Envalloc();
-                envFin->SUIV = e;
-                envFin = e;
-                initenv(&e, q->RES);
-                e->VAL = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2));
-
-                if(current == sizeofvars)
-                {
-                    vars = realloc(vars, 2*sizeofvars *sizeof(char*));
-                    sizeofvars*= 2;
-                }
-
+                initenv(&environnement, q->RES);
+                checkVar(current, sizeofvars, vars);
                 vars[current++] = strncat(q->ARG2, "\t\t: .long 0", 11);
             }
-            e->VAL = eval(q->OP, atoi(q->ARG1), atoi(q->ARG2));
             printf("%s\t\t:irmovl\t%s,\t%%eax\n", q->ETIQ, q->ARG1);
             printf("\t\tirmovl\t%s,\t%%ebx\n", q->ARG2);
             if(q->OP == Pl)
@@ -225,11 +199,7 @@ int main(int ac, char** av)
             printf("%s\t\t:nop\n", q->ETIQ);
         }
 
-<<<<<<< HEAD
-        q = q.SUIV;
-=======
         q = q->SUIV;
->>>>>>> 676d47de374dc0adb9502c6c64e15750d6182286
     }
 
 
@@ -274,10 +244,12 @@ int main(int ac, char** av)
 
     for(int i = 0; i < sizeofvars; ++i)
     {
+        if(vars[i] == NULL)
+            break;
         printf("%s\n", vars[i]);
     }
     printf("Data\t\t:\n");
-    printf("           .align 8");
+    printf("\t\t.align 8\n");
 
     free(vars);
     free(etiquette);
