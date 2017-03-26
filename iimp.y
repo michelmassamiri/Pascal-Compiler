@@ -11,7 +11,8 @@
 
   int interpreter(ENV p, nodeType*n);
   int compiler(ENV p, nodeType* n);
-
+  ENV e;
+  nodeType* arbre;
   /*
   noms : MASSAMIRI MICHEL
          DEMOULINS LOUIS
@@ -33,32 +34,32 @@
 
 %union{
     int iValue; // the value of the constant
-    char* id; // the variable string
+    char *id; // the variable string
     nodeType* p; // the node type
 };
 
-%token <iValue> CONSTANT
-%token <id> VARIABLE
-%token Sk If Wh Do Pl Mo Mu Af Se
+%token<iValue> CONSTANT
+%token<id> VARIABLE
+%token Sk If Wh Do Pl Mo Mu Af Se Mp
 %nonassoc Th El
 
-%type <p> C c E T F
+%type<p> C3A C c E T F
+%start C3A
 
 %%
 
-C3A : C                         {ENV e = Envalloc(); compiler(e, $1); }
+C3A : C                         {$$ = opr(Mp, 1, $1); arbre = $$; YYACCEPT;}
     ;
 
 C   : C Se c                    {$$ = opr(Se, 2, $1, $3);}
     | c                         {$$ = $1 ;}
     ;
 
-c   : Se                        { $$ = opr(Se, 2, NULL, NULL);}
-    | VARIABLE Af E             { nodeType* n = id($1); $$ = opr(Af, 2, n, $3); }
+c   : VARIABLE Af E             { nodeType* n = id($1); $$ = opr(Af, 2, n, $3); }
     | Sk                        { $$ = opr(Sk, 2, NULL, NULL); }
     | '(' C ')'                 { $$ = $2; }
-    | If E Th C El C            { $$ = opr(If, 3, $2, $4, $6); }
-    | Wh E Do C                 { $$ = opr(Wh, 2, $2, $4); }
+    | If E Th C El c            { $$ = opr(If, 3, $2, $4, $6); }
+    | Wh E Do c                 { $$ = opr(Wh, 2, $2, $4); }
     ;
 
 E   : E Pl T                    { $$ = opr(Pl, 2, $1, $3); }
@@ -72,7 +73,7 @@ T   : T Mu F                    { $$ = opr(Mu, 2, $1, $3); }
 
 F   : '(' E ')'                 { $$ = $2 ;}
     | CONSTANT                  { $$ = con($1); }
-    | VARIABLE                  { $$ = id($1); }
+    | VARIABLE                  { $$ = id($1);  }
     ;
 
 %%
@@ -89,11 +90,14 @@ static int interpreter_recursive(ENV e, nodeType* n) {
   if(n->type == typeCon)
     return n->con.value;
 
-  if(n->type == typeId)
+  if(n->type == typeId){
     return valch(e, n->id.v);
+  }
+
 
   if(n->type == typeOpr) {
     switch(n->opr.oper) {
+      case Mp : interpreter_recursive(e, n->opr.op[0]); break;
       case Wh :
                 while(interpreter_recursive(e, n->opr.op[0])) interpreter_recursive(e, n->opr.op[1]); return 0;
       case If :
@@ -125,8 +129,11 @@ static int interpreter_recursive(ENV e, nodeType* n) {
 }
 
 int interpreter(ENV e, nodeType* n) {
+  //if(e == NULL)
+    //yyerror("error environt e is NULL in interpreter");
+
   interpreter_recursive(e, n);
-  ecrire_env(e);
+  //ecrire_env(e);
   return 0;
 }
 
@@ -227,5 +234,11 @@ int compiler(ENV e, nodeType* n){
 }
 
 int main() {
-  return yyparse();
+  //e = Envalloc();
+  //if(e == NULL)
+    //fprintf(stderr, "ERROR ALLOC environ e\n");
+  yyparse();
+  interpreter(e, arbre);
+  ecrire_env(e);
+  return 0;
 }
