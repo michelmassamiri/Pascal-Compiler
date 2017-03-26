@@ -3,6 +3,7 @@
 #ifndef ENVIRON_IMP_H
 #define ENVIRON_IMP_H
 
+
 typedef enum {
   typeCon,
   typeId,
