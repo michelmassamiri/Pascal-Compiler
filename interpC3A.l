@@ -51,6 +51,28 @@ BILQUAD bq;
                                         operateur = Jz;
                                     else if(strcmp(yytext+1, "St") == 0)
                                         operateur = St;
+                                    else if(strcmp(yytext+1, "Jp") == 0)
+                                        operateur = Jp;
+                                    else if(strcmp(yytext+1, "Jz") == 0)
+                                        operateur = Jz;
+                                    else if(strcmp(yytext+1, "St") == 0)
+                                        operateur = St;
+                                    else if(strcmp(yytext+1, "And") == 0)
+                                        operateur = And;
+                                    else if(strcmp(yytext+1, "Or") == 0)
+                                        operateur = Or;
+                                    else if(strcmp(yytext+1, "Not") == 0)
+                                        operateur = Not;
+                                    else if(strcmp(yytext+1, "Not") == 0)
+                                        operateur = Not;
+                                    else if(strcmp(yytext+1, "Param") == 0)
+                                        operateur = Param;
+                                    else if(strcmp(yytext+1, "Param") == 0)
+                                        operateur = Param;
+                                    else if(strcmp(yytext+1, "Ret") == 0)
+                                        operateur = Ret;
+                                    else if(strcmp(yytext+1, "AfInd") == 0)
+                                        operateur = AfInd;
                                     else
                                     {
                                         printf("\n An error as been thrown\n");
@@ -144,6 +166,34 @@ int main(int ac, char** av)
             affect(environnement, q->RES, eval(q->OP, valch(environnement, q->ARG1), valch(environnement, q->ARG2)));
         }
         else if(q->OP == Sk) {;}
+        else if(q->OP == AfInd)
+        {
+            ;
+        }
+        else if(q->OP == And)
+        {
+            ;
+        }
+        else if(q->OP == Or)
+        {
+            ;
+        }
+        else if(q->OP == Not)
+        {
+            ;
+        }
+        else if(q->OP == Param)
+        {
+            ;
+        }
+        else if(q->OP == Call)
+        {
+            ;
+        }
+        else if(q->OP == Ret)
+        {
+            ;
+        }
         else{
             printf("error\n");
             return 0;
