@@ -42,11 +42,11 @@ iimp : compilerIMP compilerC3A iimp.c
 
 #interpreter pour le pseudo pascal
 
-interpPP.yy.c : ppascal.l
-			$(LEX) -o $@ $<
-
 ppascal.tab.c ppascal.tab.h : ppascal.y
 			$(YACC) -t -v -d $<
+
+ppascal.yy.c : ppascal.l ppascal.tab.h
+						$(LEX) -o $@ $<
 
 interpPP : ppascal.tab.o ppascal.yy.o bilquad.o environ.o
 			$(CC) $(CFLAGS) -o $@ $^
