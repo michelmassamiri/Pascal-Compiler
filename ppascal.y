@@ -6,7 +6,7 @@
 
   #include "environ_IMP.h"
   #include "environ.h"
-  
+
   extern int yyerror(char*);
   extern int yylex();
 
@@ -20,21 +20,36 @@
 };
 
 
-//tokens definissant des operateurs
+/* tokens definissant des operateurs */
 %token Pl Mo Mu Or Lt Eq And Not Af
-//tokens definissant des symboles
-%token  '(' ')' '[' ']' '{' '}' Se ','
-//Token definissant des mots cles
-%token If Th El Wh Do Sk T_bool T_int T_array Def Dep NewAr NFon NPro Var
-//Token definissant les symboles et chaines utilisateur
-%token <iValue> I
-%token <id> V
-%token True False
+
+/* tokens definissant des symboles */
+%token Se
+
+/* Token definissant des mots cles */
+%token If Th El Wh Do Sk T_bool T_int T_ar Def Dep NewAr Var
+
+/* Token definissant les symboles et chaines utilisateur */
+%token<iValue> I True False
+%token<id> V NFon NPro
+
+/* Les règles pour les tokens */
+%nonassoc Th El Eq Lt
+
+%left Or And
+%left Pl Mo
+%left Mu
+
+%right Not
+/* Definir les non-terminals */
+
+
+
 
 
 %%
 
-MP          : L_vart LD C
+MP          : L_vart LD C                           {printf("la Syntax est vraie\n"); YYACCEPT;}
             ;
 
 E           : E Pl E
@@ -45,27 +60,33 @@ E           : E Pl E
             | E Eq E
             | E And E
             | Not E
-            | '(' E ')'
+            | V '(' L_args ')'
+            | Et
+            | F
+            ;
+
+F           : '(' E ')'
             | I
             | V
             | True
             | False
-            | V '(' L_args ')'
             | NewAr TP '[' E ']'
-            | Et
             ;
 
 Et          : V '[' E ']'
             | Et '[' E ']'
             ;
 
-C           : C Se C
-            | Et Af E
+C           : C Se c
+            | c
+            ;
+
+c           : Et Af E
             | V Af E
             | Sk
             | '{' C '}'
-            | If E Th C El C
-            | Wh E Do C
+            | If E Th C El c
+            | Wh E Do c
             | V '(' L_args ')'
             ;
 
@@ -90,7 +111,7 @@ Argt        : V ':' TP
 
 TP          : T_bool
             | T_int
-            | T_array TP
+            | T_ar TP
             ;
 
 L_vart      : %empty
