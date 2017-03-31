@@ -131,6 +131,7 @@ int main(int ac, char** av)
 
     ENV stack[STACKSIZE];
     ENV environnement = stack[0];
+    QUAD stackQuad[STACKSIZE];
     QUAD q = bq.debut;
 
     int stackLayer = 0; //taille actuelle de la pile d'appel
@@ -189,6 +190,7 @@ int main(int ac, char** av)
         }
         else if(q->OP == Call)
         {
+            stackQuad[stackLayer] = q->SUIV;
             if(++stackLayer >= STACKSIZE)
             {
                 printf("Stack Overflow.\n");
@@ -196,14 +198,14 @@ int main(int ac, char** av)
             }
             cpyEnv(environnement, &stack[stackLayer]);
             environnement = stack[stackLayer];
+            q = rechbq(q->ARG1, bq);
         }
         else if(q->OP == Ret)
         {
             if(stackLayer == 0)
-            {
                 return 0;
-            }
             environnement = stack[--stackLayer];
+            q = stackQuad[stackLayer];
         }
         else{
             printf("error\n");
