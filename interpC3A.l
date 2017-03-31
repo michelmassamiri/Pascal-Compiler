@@ -6,6 +6,8 @@
 #include "environ.h"
 #include "enum_operation.h"
 
+#define STACKSIZE 64
+
 char *etiquette;
 int operateur = 0;
 char *arg1, *arg2, *dest;
@@ -130,6 +132,8 @@ int main(int ac, char** av)
     ENV environnement = NULL;
     QUAD q = bq.debut;
 
+    int stackLayer = 0; //taille actuelle de la pile d'appel
+
     while(q != NULL)
     {
         if(q->OP == Jp)
@@ -159,7 +163,7 @@ int main(int ac, char** av)
                 initenv(&environnement, q->RES);
             affect(environnement, q->RES, atoi(q->ARG1));
         }
-        else if(q->OP == Pl || q->OP == Mu || q->OP == Mo)
+        else if(q->OP == Pl || q->OP == Mu || q->OP == Mo || q->OP == And || q->OP == OR)
         {
             if(rech(q->RES, environnement) == NULL)
                 initenv(&environnement, q->RES);
@@ -170,17 +174,11 @@ int main(int ac, char** av)
         {
             ;
         }
-        else if(q->OP == And)
-        {
-            ;
-        }
-        else if(q->OP == Or)
-        {
-            ;
-        }
         else if(q->OP == Not)
         {
-            ;
+            if(rech(q->RES, environnement) == NULL)
+                initenv(&environnement, q->RES);
+            affect(environnement, q->RES, !valch(environnement, q->ARG1));
         }
         else if(q->OP == Param)
         {

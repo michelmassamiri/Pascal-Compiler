@@ -48,6 +48,10 @@ int eval(int op, int arg1, int arg2)
       return(arg1 - arg2);
     case Mu:
       return(arg1 * arg2);
+    case And:
+      return(arg1 && arg2);
+    case Or:
+      return(arg1 || arg2);
     default:
       return(0);
     }
