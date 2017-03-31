@@ -129,7 +129,8 @@ int main(int ac, char** av)
 
     yylex();
 
-    ENV environnement = NULL;
+    ENV stack[STACKSIZE];
+    ENV environnement = stack[0];
     QUAD q = bq.debut;
 
     int stackLayer = 0; //taille actuelle de la pile d'appel
@@ -163,7 +164,7 @@ int main(int ac, char** av)
                 initenv(&environnement, q->RES);
             affect(environnement, q->RES, atoi(q->ARG1));
         }
-        else if(q->OP == Pl || q->OP == Mu || q->OP == Mo || q->OP == And || q->OP == OR)
+        else if(q->OP == Pl || q->OP == Mu || q->OP == Mo || q->OP == And || q->OP == Or)
         {
             if(rech(q->RES, environnement) == NULL)
                 initenv(&environnement, q->RES);
@@ -186,15 +187,24 @@ int main(int ac, char** av)
         }
         else if(q->OP == Call)
         {
-            ;
+            if(++stackLayer >= STACKSIZE)
+            {
+                printf("Stack Overflow.\n");
+                return EXIT_FAILURE;
+            }
+            environnement = stack[stackLayer];
         }
         else if(q->OP == Ret)
         {
-            ;
+            if(stackLayer == 0)
+            {
+                return 0;
+            }
+            environnement = stack[--stackLayer];
         }
         else{
             printf("error\n");
-            return 0;
+            return EXIT_FAILURE;
         }
         q = q->SUIV;
     }
