@@ -183,7 +183,9 @@ int main(int ac, char** av)
         }
         else if(q->OP == Param)
         {
-            ;
+            if(rech(q->ARG1, stack[stackLayer+1]) == NULL)
+                initenv(&stack[stackLayer+1], q->ARG1);
+            affect(stack[stackLayer+1], q->ARG1, atoi(q->ARG2));
         }
         else if(q->OP == Call)
         {
@@ -192,6 +194,7 @@ int main(int ac, char** av)
                 printf("Stack Overflow.\n");
                 return EXIT_FAILURE;
             }
+            cpyEnv(environnement, &stack[stackLayer]);
             environnement = stack[stackLayer];
         }
         else if(q->OP == Ret)

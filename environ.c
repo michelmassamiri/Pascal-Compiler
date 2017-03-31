@@ -103,3 +103,16 @@ int valch(ENV rho, char *var)
   else
     return(0);
 }
+
+void cpyEnv(ENV rho, ENV *phi)
+{
+    while(rho != NULL)
+    {
+        if(rech(rho->ID, &phi) == NULL)
+        {
+            initenv(phi, rho->ID);
+            affect(phi, rho->ID, rho->VAL);
+        }
+        rho = rho->SUIV;
+    }
+}

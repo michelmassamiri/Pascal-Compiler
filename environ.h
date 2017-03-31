@@ -24,4 +24,7 @@ extern int valch(ENV rho, char *var); /* valeur de var dans envirnt rho         
 #define MAXQUAD  5*MAXIDENT  /* long max d'un quadruplet c3a                     */
 
 
+extern void cpyEnv(ENV rho, ENV *phi); //copie l'environnement rho dans l'environnement phi
+
+
 #endif
