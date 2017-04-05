@@ -2,7 +2,7 @@ CC=gcc
 YACC = bison
 LEX = flex
 CFLAGS:= -std=gnu99 -g
-LDFLAGS:=
+LDFLAGS:= -lm
 PROGS = compilerIMP compilerC3A interpC3A interpIMP interpPP
 
 .PHONY : clean
@@ -22,7 +22,7 @@ interpC3A.yy.c : interpC3A.l
 								$(LEX) -o $@ $<
 
 interpC3A : interpC3A.yy.o bilquad.o environ.o
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 interpIMP : environ_IMP.o bilquad.o iimp.tab.o iimp.yy.o environ.o
 						$(CC) $(CFLAGS) -o $@ $^

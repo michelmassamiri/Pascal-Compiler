@@ -5,6 +5,7 @@
 #include "bilquad.h"
 #include "environ.h"
 #include "enum_operation.h"
+#include <math.h>
 
 #define STACKSIZE 64
 
@@ -126,6 +127,10 @@ int main(int ac, char** av)
     yylex();
 
     ENV stack[STACKSIZE];
+    for(int i = 0; i < STACKSIZE; ++i)
+    {
+        stack[i] = NULL;
+    }
     ENV environnement = stack[0];
     QUAD stackQuad[STACKSIZE];
     QUAD q = bq.debut;
@@ -179,13 +184,43 @@ int main(int ac, char** av)
         }
         else if(q->OP == Ind)
         {
+            char * varName = malloc((2+strlen(q->ARG1)+strlen(q->ARG2))*sizeof(char));
+            strcat(varName, q->ARG1);
+            strcat(varName, "[");
+            if(rech(q->ARG2, environnement) != NULL)
+            {
+                int index = valch(environnement, q->ARG2);
+                char *arg2 = malloc((floor(log10(abs(index)))+1)*sizeof(char));
+                sprintf(arg2, "%d", index);
+                strcat(varName, arg2);
+            }
+            else
+                strcat(varName, q->ARG2);
+            strcat(varName, "]");
+
             if(rech(q->RES, environnement) == NULL)
                 initenv(&environnement, q->RES);
-
+            affect(environnement, q->RES, valch(environnement, varName));
         }
         else if(q->OP == AfInd)
         {
-            ;
+            char * varName = malloc((2+strlen(q->ARG1)+strlen(q->ARG2))*sizeof(char));
+            strcat(varName, q->ARG1);
+            strcat(varName, "[");
+            if(rech(q->ARG2, environnement) != NULL)
+            {
+                int index = valch(environnement, q->ARG2);
+                char *arg2 = malloc((floor(log10(abs(index)))+1)*sizeof(char));
+                sprintf(arg2, "%d", index);
+                strcat(varName, arg2);
+            }
+            else
+                strcat(varName, q->ARG2);
+            strcat(varName, "]");
+
+            if(rech(varName, environnement) == NULL)
+                initenv(&environnement, varName);
+            affect(environnement, varName, valch(environnement, q->RES));
         }
         else if(q->OP == Not)
         {
@@ -207,7 +242,6 @@ int main(int ac, char** av)
                 printf("Stack Overflow.\n");
                 return EXIT_FAILURE;
             }
-            cpyEnv(environnement, &stack[stackLayer]);
             environnement = stack[stackLayer];
             q = rechbq(q->ARG1, bq);
         }
