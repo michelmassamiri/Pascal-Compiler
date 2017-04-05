@@ -214,8 +214,13 @@ int main(int ac, char** av)
                 sprintf(arg2, "%d", index);
                 strcat(varName, arg2);
             }
-            else
+            else if(isnumber(q->ARG2))
                 strcat(varName, q->ARG2);
+            else
+            {
+                printf("Variable %s does not exist\n", q->ARG2);
+                return -1;
+            }
             strcat(varName, "]");
 
             if(rech(varName, environnement) == NULL)
