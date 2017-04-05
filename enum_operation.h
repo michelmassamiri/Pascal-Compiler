@@ -14,11 +14,12 @@
 #define And 301
 #define Or 302
 #define Not 303
-#define Lt 302
-#define AfInd 304
-#define Call 305
-#define Ret 306
-#define Param 307
+#define Lt 304
+#define AfInd 305
+#define Call 306
+#define Ret 307
+#define Param 308
+#define Ind 309
 
 
 #define If 266

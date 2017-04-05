@@ -53,12 +53,8 @@ BILQUAD bq;
                                         operateur = Jz;
                                     else if(strcmp(yytext+1, "St") == 0)
                                         operateur = St;
-                                    else if(strcmp(yytext+1, "Jp") == 0)
-                                        operateur = Jp;
-                                    else if(strcmp(yytext+1, "Jz") == 0)
-                                        operateur = Jz;
-                                    else if(strcmp(yytext+1, "St") == 0)
-                                        operateur = St;
+                                    else if(strcmp(yytext+1, "Ind") == 0)
+                                        operateur = Ind;
                                     else if(strcmp(yytext+1, "And") == 0)
                                         operateur = And;
                                     else if(strcmp(yytext+1, "Or") == 0)
@@ -180,6 +176,12 @@ int main(int ac, char** av)
                 affect(environnement, q->RES, 1);
             else
                 affect(environnement, q->RES, 0);
+        }
+        else if(q->OP == Ind)
+        {
+            if(rech(q->RES, environnement) == NULL)
+                initenv(&environnement, q->RES);
+
         }
         else if(q->OP == AfInd)
         {
