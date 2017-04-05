@@ -52,14 +52,14 @@
 MP          : L_vart LD C                           {printf("la Syntax est vraie\n"); YYACCEPT;}
             ;
 
-E           : E Pl E
-            | E Mo E
-            | E Mu E
-            | E Or E
-            | E Lt E
-            | E Eq E
-            | E And E
-            | Not E
+E           : E Pl E                                {/*$$ = $1 + $3*/;}
+            | E Mo E                                {/*$$ = $1 - $3*/;}
+            | E Mu E                                {/*$$ = $1 * $3*/;}
+            | E Or E                                {/*$$ = $1 || $3*/;}
+            | E Lt E                                {/*$$ = ($1 < $3)*/;}
+            | E Eq E                                {/*$$ = ($1 == $3)*/;}
+            | E And E                               {/*$$ = $1 && $3*/;}
+            | Not E                                 {/*$$ = !$2*/;}
             | V '(' L_args ')'
             | Et
             | F
@@ -68,8 +68,8 @@ E           : E Pl E
 F           : '(' E ')'
             | I
             | V
-            | True
-            | False
+            | True                                  {/* $$ = (1==1) */;}
+            | False                                 {/* $$ = (1==0) */;}
             | NewAr TP '[' E ']'
             ;
 
