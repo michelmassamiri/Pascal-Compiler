@@ -51,5 +51,11 @@ ppascal.yy.c : ppascal.l ppascal.tab.h
 interpPP : ppascal.tab.o ppascal.yy.o bilquad.o environ.o
 			$(CC) $(CFLAGS) -o $@ $^
 
+rapport :
+		cd rapport/
+		pdflatex rapport.tex
+		pdflatex rapport.tex
+		cd ../
+
 clean :
-			rm -f *.tab.* *.o *.yy.c $(PROGS) *.output
+			rm -f *.tab.* *.o *.yy.c $(PROGS) *.output rapport/*.aux rapport/*.log rapport/*.pdf
