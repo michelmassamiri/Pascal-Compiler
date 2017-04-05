@@ -65,8 +65,8 @@ BILQUAD bq;
                                         operateur = Or;
                                     else if(strcmp(yytext+1, "Not") == 0)
                                         operateur = Not;
-                                    else if(strcmp(yytext+1, "Not") == 0)
-                                        operateur = Not;
+                                    else if(strcmp(yytext+1, "Lt") == 0)
+                                        operateur = Lt;
                                     else if(strcmp(yytext+1, "Param") == 0)
                                         operateur = Param;
                                     else if(strcmp(yytext+1, "Param") == 0)
@@ -172,6 +172,15 @@ int main(int ac, char** av)
             affect(environnement, q->RES, eval(q->OP, valch(environnement, q->ARG1), valch(environnement, q->ARG2)));
         }
         else if(q->OP == Sk) {;}
+        else if(q->OP == Lt)
+        {
+            if(rech(q->RES, environnement) == NULL)
+                initenv(&environnement, q->RES);
+            if(valch(environnement, q->ARG1) < valch(environnement, q->ARG2))
+                affect(environnement, q->RES, 1);
+            else
+                affect(environnement, q->RES, 0);
+        }
         else if(q->OP == AfInd)
         {
             ;

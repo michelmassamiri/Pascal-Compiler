@@ -14,6 +14,7 @@
 #define And 301
 #define Or 302
 #define Not 303
+#define Lt 302
 #define AfInd 304
 #define Call 305
 #define Ret 306
