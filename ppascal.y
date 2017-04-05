@@ -10,6 +10,8 @@
   extern int yyerror(char*);
   extern int yylex();
 
+  int line = 1;
+
 %}
 
 
@@ -36,11 +38,9 @@
 /* Les règles pour les tokens */
 %nonassoc Th El Eq Lt
 
-%left Or And
-%left Pl Mo
+%left Pl Mo Or
 %left Mu
 
-%right Not
 /* Definir les non-terminals */
 
 
@@ -52,25 +52,28 @@
 MP          : L_vart LD C                           {printf("la Syntax est vraie\n"); YYACCEPT;}
             ;
 
-E           : E Pl E                                {/*$$ = $1 + $3*/;}
-            | E Mo E                                {/*$$ = $1 - $3*/;}
-            | E Mu E                                {/*$$ = $1 * $3*/;}
-            | E Or E                                {/*$$ = $1 || $3*/;}
-            | E Lt E                                {/*$$ = ($1 < $3)*/;}
-            | E Eq E                                {/*$$ = ($1 == $3)*/;}
-            | E And E                               {/*$$ = $1 && $3*/;}
-            | Not E                                 {/*$$ = !$2*/;}
-            | V '(' L_args ')'
-            | Et
+E           : E Pl T
+            | E Mo T
+            | E Mu T
+            | E Or T
+            | E Lt T
+            | E Eq T
+            | T
+            ;
+
+T           : T And F
+            | Not F
             | F
             ;
 
 F           : '(' E ')'
             | I
             | V
-            | True                                  {/* $$ = (1==1) */;}
-            | False                                 {/* $$ = (1==0) */;}
+            | True
+            | False
+            | V '(' L_args ')'
             | NewAr TP '[' E ']'
+            | Et
             ;
 
 Et          : V '[' E ']'
