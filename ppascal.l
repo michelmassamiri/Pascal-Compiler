@@ -4,6 +4,7 @@
   #include "environ_IMP.h"
 
   #include "ppascal.tab.h"
+  extern int line;
 
 %}
 
@@ -16,8 +17,8 @@
 "+" { return Pl; }
 "-" { return Mo; }
 "*" { return Mu; }
-"OR" | "or" { return Or; }
-"AND" | "and" { return And; }
+"or" { return Or; }
+"and" { return And; }
 "not" { return Not; }
 ":=" { return Af; }
 "<" { return Lt ;}
@@ -51,7 +52,7 @@
 
 
 
-
-[ \t\n] {;}
-. { return *yytext; }
+[ \t]+  {;}
+\n {line++;}
+. { return yytext[0]; }
 %%
