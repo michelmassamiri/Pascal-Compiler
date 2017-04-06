@@ -120,6 +120,17 @@ BILQUAD bq;
 
 %%
 
+int isnumber(char * chaine)
+{
+    int l = strlen(chaine);
+    for(int i = 0; i < l; ++i)
+    {
+        if(!isdigit(chaine[i]))
+            return 0;
+    }
+    return 1;
+}
+
 int main(int ac, char** av)
 {
     etiquette = malloc(sizeof(char));
