@@ -54,6 +54,20 @@ int ex_bis(ENV *e,nodeType *p) {
                         snprintf(buf,20,"CT%d",currentC);
                         print(current++,"Af", p->opr.op[0]->id.id, buf,NULL );
 	                    break;
+                        
+            case Afc:
+                        ex_bis(e, p->opr.op[0]);
+                        snprintf(buff, 20, "%d", p->con.value);
+                        print(current++, "Afc", buf, NULL, p->opr.op[0]->id.id);
+                        break;
+
+            case St:
+                        print(current++, "St", NULL, NULL, NULL);
+                        break;
+
+            case Sk:
+                        print(current++, "Sk", NULL, NULL, NULL);
+                        break;
 
 	        case Se:    ex_bis(e,p->opr.op[0]); return ex_bis(e,p->opr.op[1]);
 
