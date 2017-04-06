@@ -2,10 +2,13 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+#include <ctype.h>
+
 #include "bilquad.h"
 #include "environ.h"
 #include "enum_operation.h"
-#include <math.h>
+
 
 #define STACKSIZE 64
 
