@@ -1,7 +1,8 @@
 %{
   #include <stdio.h>
   #include <string.h>
-  #include "environ_IMP.h"
+  #include "arbre.h"
+  #include "anasem.h"
 
   #include "ppascal.tab.h"
   extern int line;
@@ -32,7 +33,7 @@
 "while" { return Wh; }
 "do" { return Do; }
 "skip" { return Sk; }
-"boolean" { return T_bool; }
+"boolean" { return T_boo; }
 "integer" { return T_int; }
 "new array of" { return NewAr; }
 "array of" { return T_ar; }
@@ -48,7 +49,7 @@
 <FONC>[A-Za-z][A-Za-z0-9]* {BEGIN(INITIAL); yylval.id = strdup(yytext); return NFon; }
 <PROC>[A-Za-z][A-Za-z0-9]* {BEGIN(INITIAL); yylval.id = strdup(yytext); return NPro; }
 0|[1-9][0-9]* { yylval.iValue = atoi(yytext); return I; }
-[A-Za-z][A-Za-z0-9]* { yylval.id = strdup(yytext); return V; }
+[A-Za-z][A-Za-z0-9]* { yylval.NODE = id(strdup(yytext), creer_type(0, T_bot)); return V; }
 
 
 
