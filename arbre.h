@@ -74,7 +74,10 @@ typedef struct{
 extern int yyerror(char* s);
 
 /*------------------FONCTIONS ---------------------------------------------------*/
-extern LFON creer_fon(char *nfon, BILENVTY lparam,BILENVTY lvars,nodeType* com,type tp, LFON suiv);
+extern LFON creer_fon(char *nfon, BILENVTY lparam,BILENVTY lvars,nodeType* com,type tp);
+extern LFON creer_proc(char *nproc, BILENVTY lparam,BILENVTY lvars,nodeType* com);
+extern LFON creer_entfon(char *nfon, BILENVTY lparam, type tp);
+extern LFON creer_entproc(char *nproc, BILENVTY lparam);
 /* pointe vers cette fonction */
 extern LFON copier_fon(LFON lfn);    /* pointe vers une copie                */
 extern void ecrire_fon(LFON bfn);

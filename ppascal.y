@@ -16,6 +16,8 @@
   BILENVTY benvty;     /* Global environnement */
   char ident[MAXIDENT]; /* Current ID */
   ENVTY vtycour;        /* Current typed var */
+  BILFON bfon;          /* Table de symobole des fonctions */
+  LFON ftcour;          /* Fonction actuelle */
 
 %}
 
@@ -26,6 +28,8 @@
     nodeType* NODE; // the node type. Ex : I, V, operator
     type TYP; // the expression type of the node. Ex : integer, boolean, Commande...
     BILENVTY LARGT; // the symobole table ;
+    LFON FonCel; // La cellule de la fonction
+    BILFON FonTable; // La table de symboles des fonctions
 };
 
 %start MP
@@ -53,7 +57,9 @@
 /* Definir les non-terminals */
 %type<NODE> MP c C E T F Et
 %type<TYP> TP
-%type<LARGT> Argt L_vart L_vartnn
+%type<LARGT> Argt L_vart L_vartnn L_argt L_argtnn
+%type<FonCel> D_entp D_entf
+%type<FonTable> LD D
 
 
 
@@ -112,12 +118,12 @@ L_argsnn    : E                                                    {;}
             | E ',' L_argsnn                                       {;}
             ;
 
-L_argt      : %empty                                               {;}
-            | L_argtnn                                             {;}
+L_argt      : %empty                                               { $$ = bilenvty_vide(); }
+            | L_argtnn                                             { $$ = $1; }
             ;
 
-L_argtnn    : Argt                                                 {;}
-            | L_argtnn ',' Argt                                    {;}
+L_argtnn    : Argt                                                 { $$ = $1; }
+            | L_argtnn ',' Argt                                    { $$ = concatty($1, $3);}
             ;
 
 Argt        : V ':' TP                                            { vtycour=creer_envty($1->id.v, $3, 0); $$ = creer_bilenvty(vtycour);}
@@ -136,18 +142,18 @@ L_vartnn    : Var Argt                                            { $$ = $2 ;}
             | L_vartnn ',' Var Argt                               { $$ = concatty($1,$4); }
             ;
 
-D_entp      : Dep NPro '(' L_argt ')'                             {;}
+D_entp      : Dep NPro '(' L_argt ')'                             { $$ = creer_entproc($2, $4); }
             ;
 
-D_entf      : Def NFon '(' L_argt ')' ':' TP                      {;}
+D_entf      : Def NFon '(' L_argt ')' ':' TP                      { $$ = creer_entfon($2, $4, $7); }
             ;
 
-D           : D_entp L_vart C                                     {;}
-            | D_entf L_vart C                                     {;}
+D           : D_entp L_vart C                                     { ftcour = creer_proc($1->ID, $1->PARAM, $2, $3); $$ = creer_bilfon(ftcour);}
+            | D_entf L_vart C                                     { ftcour = creer_fon($1->ID, $1->PARAM, $2, $3, $1->TYPE); $$ = creer_bilfon(ftcour); }
             ;
 
-LD          : %empty                                              {;}
-            | LD D                                                {;}
+LD          : %empty                                              { $$ = bilfon_vide(); }
+            | LD D                                                { $$ = concatfn($1, $2); }
             ;
 
 %%

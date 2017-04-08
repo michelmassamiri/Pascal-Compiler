@@ -400,7 +400,7 @@ extern void ajout_var(BILENVTY rho, char *nomvar, type tp)
 /*---------------------fonctions -----------------------------------------------*/
 
 /* pointe vers cette fonction */
-extern LFON creer_fon(char *nfon, BILENVTY lparam,BILENVTY lvars,nodeType* com,type tp, LFON suiv){
+extern LFON creer_fon(char *nfon, BILENVTY lparam,BILENVTY lvars,nodeType* com,type tp){
   LFON res=Lfonalloc();
     if (nfon !=NULL)
       {
@@ -411,8 +411,47 @@ extern LFON creer_fon(char *nfon, BILENVTY lparam,BILENVTY lvars,nodeType* com,t
     res->VARLOC=lvars;
     res->CORPS=com;
     res->TYPE=tp;
-    res->SUIV=suiv;
+
     return(res);
+}
+
+extern LFON creer_proc(char *nproc, BILENVTY lparam,BILENVTY lvars,nodeType* com){
+  LFON res=Lfonalloc();
+    if (nproc !=NULL)
+      {
+        res->ID=Idalloc();
+        strcpy(res->ID,nproc);
+      }
+    res->PARAM=lparam;
+    res->VARLOC=lvars;
+    res->CORPS=com;
+
+    return(res);
+}
+
+extern LFON creer_entfon(char *nfon, BILENVTY lparam, type tp) {
+  LFON res = Lfonalloc();
+  if(nfon != NULL) {
+    res->ID = Idalloc();
+    strcpy(res->ID, nfon);
+  }
+
+  res->PARAM = lparam ;
+  res->TYPE = tp;
+
+  return res;
+}
+
+extern LFON creer_entproc(char *nproc, BILENVTY lparam) {
+  LFON res = Lfonalloc();
+  if(nproc != NULL) {
+    res->ID = Idalloc();
+    strcpy(res->ID, nproc);
+  }
+
+  res->PARAM = lparam ;
+
+  return res;
 }
 
 /* pointe vers une copie */

@@ -10,8 +10,7 @@
 %}
 
 %option noyywrap
-%s DEFUN DEFPRO FONC PROC
-
+%s FONC PROC
 /* Declare tokens */
 %%
 
@@ -44,8 +43,8 @@
 "true" { return True; }
 "false" { return False; }
 
-<DEFUN>defun {BEGIN(FONC); return Def;}
-<DEFPRO>defpro {BEGIN(PROC); return Dep;}
+"defun" { BEGIN(FONC); return Def;}
+"defpro" { BEGIN(PROC); return Dep;}
 <FONC>[A-Za-z][A-Za-z0-9]* {BEGIN(INITIAL); yylval.id = strdup(yytext); return NFon; }
 <PROC>[A-Za-z][A-Za-z0-9]* {BEGIN(INITIAL); yylval.id = strdup(yytext); return NPro; }
 0|[1-9][0-9]* { yylval.iValue = atoi(yytext); return I; }
