@@ -42,13 +42,19 @@ iimp : compilerIMP compilerC3A iimp.c
 
 #interpreter pour le pseudo pascal
 
-ppascal.tab.c ppascal.tab.h : ppascal.y
-			$(YACC) -t -v -d $<
+#ppascal.tab.c ppascal.tab.h : ppascal.y
+			#$(YACC) -t -v -d $<
 
 ppascal.yy.c : ppascal.l ppascal.tab.h
 						$(LEX) -o $@ $<
 
-interpPP : ppascal.tab.o ppascal.yy.o bilquad.o environ.o
+ppascal.tab.c ppascal.tab.h : ppascal.y arbre.h anasem.h
+						$(YACC) -t -v -d $<
+
+arbre.o : arbre.c arbre.h ppascal.tab.h
+anasem.o : anasem.c anasem.h ppascal.tab.h
+
+interpPP : ppascal.tab.o ppascal.yy.o arbre.o anasem.o
 			$(CC) $(CFLAGS) -o $@ $^
 
 rapport :
