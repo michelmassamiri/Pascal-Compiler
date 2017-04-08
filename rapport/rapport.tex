@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[francais]{babel}
+\usepackage{listings}
 
 
 \title{Rapport du projet de compilation}
@@ -11,13 +12,24 @@
 
 \begin{document}
 
-
 \maketitle
+\newpage
 
+\tableofcontents
 
 \newpage
 \section{Introduction}
 
+Le présent projet de compilation a été effectué dans le cadre de l'Unité d'Enseignement "Compilation" de la troisième année de licence Informatique de l'université de Bordeaux.
+
+\medbreak
+
+Le but de ce projet est de créer un interpréteur d'un langage similaire au langage Pascal. Il s'agit cependant d'une version simplifiée de ce langage qui se nomme Pseudo-Pascal.
+En effet il ne comportes que deux types de variables, les entiers et les booléens, et des tableaux dynamiques de ces deux types.
+
+Dans un second temps nous avons du créer un interpréteur d'un langage à trois adresses, qui sert de langage intermédiaire entre le Pseudo-Pascal et le langage assembleur de la machine.
+
+Enfin il était demande de créer un compilateur (traducteur) du langage Pseudo-Pascal vers le code à trois adresses.
 
 \newpage
 \section{Interpreteur Pseudo Pascal}
@@ -31,7 +43,103 @@
 \newpage
 \section{Interpreteur Code à 3 Adresses}
 
+L'interpréteur du code à trois adresses se compose principalement d'un lexer. Etant donné que le code à trois adresses ne possède pas de grammaire au même titre que le langage Pseudo-Pascal,
+dû au fait qu'on ne puisse exécuter qu'une seule action élémentaire par ligne de code (il est impossible d'avoir une expression (X + Y)*2 sur une même ligne), il ne nécissite donc pas l'implémentation d'un parser associé.
 
+A ce lexer vient s'ajouter des fichiers complémentaires. Le fichier environ.c permet de créer les environnements dans lesquels vont être exécuter les différentes instruction qu'on aura au préalable écrite. Ce sont ces environnement qui vont donner les valeurs des variables en fin d'exécution.
+On utilise aussi le fichier bilquad.c permettant de créer des bi-listes de quadruplets.
+
+Les environnements, quadruplets et bi-listes de quadruplets seront définits plus loins. Nous allons commencer par voir la structure du code à trois adresses.
+
+
+\subsection{Structure du code à trois adresses}
+
+Le code à trois adresses se compose de cinq éléments :
+\begin{itemize}
+\item Une étiquette
+\item Un opérateur
+\item Un premier argument
+\item Un second argument
+\item La destination de l'operation
+\end{itemize}
+
+Il est à noter que tous les éléments ne sont pas toujours nécessaires pour toutes les opérations possibles.
+\medbreak
+L'étiquette désigne grossièrement l'emplacement de l'instruction dans le programme. Elle permettent de pouvoir revenir à une instruction déjà effectuée (dans le cas d'une boucle) ou d'en sauter un certain certaines (apres une condition par exemple). Il a la forme ETx, où x désigne un nombre (par exemple ET12).
+
+Les arguments et la déstination pointe soit sur des variables, soit sur des étiquettes, soit des numéraux. Pour une addition par exemple, on ajoutera la valeur de la variable du premier et du second argument, et on stockera le résultat dans la destination.
+
+L'opérateur indique quelle opération va être effectué. Les différents opérateurs sont (dans le tableau, code à trois adresses est désigné par l'acronyme C3A):
+
+\begin{tabular}{|p{1.5cm}|p{2cm}|p{7cm}|}
+  \hline
+  Opérateur C3A & nom opérateur complet 2 & effet de l'opérateur \\
+  \hline
+  \hline
+  Pl & Plus & Affecte à la destination la somme des deux arguments \\  \hline
+  Mo & Moins & Affecte à la destination la différence du premier et du second arguments \\  \hline
+  Mu & Multiplication & Affecte à la destination le produit des deux arguments \\  \hline
+  And & And & Affecte à la destination le résultat de l'opération logique ET des deux arguments \\  \hline
+  Or & Or & Affecte à la destination le résultat de l'opération logique OU des deux arguments \\  \hline
+  Not & Not & Affecte à la destination le résultat de l'opération logique NON sur le premier argument \\  \hline
+  Lt & Lower Than & Affecte à la destination 0 si le premier argument est plus petit que le second, 1 sinon\\  \hline
+  Af & Affecte & Affecte au second argument la valeur du premier, qui est une variable\\  \hline
+  Afc & Affecte & Affecte au second argument la valeur du premier, qui est un numéral\\  \hline
+  AfInd & Affecte à l'indice & Affecte à Arg1[Arg2] la valeur de destination\\  \hline
+  Ind & Indice & Affecte à la destination la valeur de Arg1[Arg2]\\  \hline
+  Jp & Jump & Fait un saut à l'instruction dont l'etiquette est destination\\  \hline
+  Jz & Jump if Zero & Fait un saut à l'instruction dont l'etiquette est destination si la valeur du premier argument vaut 0\\  \hline
+  Call & Call & Appelle la fonction se trouvant à l'étiquette destination\\  \hline
+  Ret & Return & Retourne à l'instruction suivant le dernier call effectué\\  \hline
+  Param & Paramettre & Ajoute un paramettre pour le prochain appel de fonction, ayant comme nom le premier argument et comme valeur celle du second\\  \hline
+  Sk & Skip & Ne modifie pas l'environnement, passe directement à l'instruction suivante\\  \hline
+  St & Stop & Termine l'exécution du programme\\  \hline
+\end{tabular}
+
+\bigbreak
+Ainsi, avec tous ces opérateurs, un programme permettant de calculer 4 + 5 serait :
+\begin{lstlisting}
+    ET0 :Afc :4 : :X1
+    ET1 :Afc :5 : :X2
+    ET2 :Pl :X1 :X2 :X3
+    ET3 :St : : :
+\end{lstlisting}
+
+Dans le but d'illustrer l'utilisation des fonctions, voici un bout de code permettant de calculer PARAM1 modulo PARAM2, et de donner le résultat dans RESULT.
+
+\begin{lstlisting}
+    ET0 :Af :PARAM1 : :X1
+    ET1 :Lt :PARAM1 :PARAM2 :X0
+    ET2 :Jz :X0 : :ET7
+    ET3 :Sk : : :
+    ET4 :Mo :X1 :PARAM2 :X1
+    ET5 :Lt :PARAM2 :X1 :X0
+    ET6 :Jz :X0 : :ET3
+    ET7 :Af :X1 : :RETURN
+    ET8 :Ret : : :
+
+    ET9 :Afc :30 : :PARAM1
+    ET10 :Afc :5 : :PARAM2
+    ET11 :Afc :0 : :RETURN
+    ET12 :Param :PARAM1 :PARAM1 :
+    ET13 :Param :PARAM2 :PARAM2 :
+    ET14 :Call : : :ET0
+    ET15 :Sk : : :
+    ET16 :St : : :
+\end{lstlisting}
+
+\subsection{Les environnements}
+
+\subsection{Quadruplets et Bi-listes de quadruplets}
+
+Ces quadruplets servent à stocker les différentes instructions du programme en code à trois adresses. Un quadruplet est définit comme :
+
+\begin{itemize}
+\item Une étiquette (char * ETIQ)
+\item Un opérateur (int OP)
+\item Un triplet de noms, permettant de définir les deux arguments et la destination e l'opération (char * ARG1, * ARG2, * RES)
+\item Le quadruplet suivant (struct cellquad SUIV)
+\end{itemize}
 
 \newpage
 \section{Compilateur Code à 3 Adresses}
