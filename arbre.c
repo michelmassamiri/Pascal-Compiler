@@ -7,7 +7,9 @@
 
 #include "arbre.h"
 #include "ppascal.tab.h"
-/* this file contains all the constructors types of the node */
+
+/*-------------------------------------------------------------------*/
+/*--------------------------------arbres-----------------------------*/
 
 /* the constant node constructor */
 nodeType *con(int value, type type_con) {
@@ -77,7 +79,7 @@ void freeNode(nodeType *p) {
 
 /*-------------------------------------------------------------------*/
 /* ----------------------------types---------------------------------*/
-/*  type, NOE,ENVTY,LFON,BILENVTY,BILFON : definis dans arbre.h      */
+/*  type, nodetype*,ENVTY,LFON,BILENVTY,BILFON : definis dans arbre.h      */
 /*-------------------------------------------------------------------*/
 /*---------------------allocation memoire----------------------------*/
 char *Idalloc()
@@ -94,8 +96,9 @@ type *talloc()
   return((type *)malloc(sizeof(type)));
 }
 
-/*-------------------------------------------------------------------*/
-/*--------------------------------arbres-----------------------------*/
+LFON Lfonalloc(){
+  return ((LFON)malloc(sizeof(struct cellfon)));
+}
 
 /*-------------------------------------------------------------------*/
 /*-----------------------------environnements------------------------*/
@@ -391,6 +394,148 @@ extern void ajout_var(BILENVTY rho, char *nomvar, type tp)
   BILENVTY bvty=creer_bilenvty(vty);
   rho= concatty(bvty,rho);
   return;
+}
+
+/*-------------------------------------------------------------------------------*/
+/*---------------------fonctions -----------------------------------------------*/
+
+/* pointe vers cette fonction */
+extern LFON creer_fon(char *nfon, BILENVTY lparam,BILENVTY lvars,nodeType* com,type tp, LFON suiv){
+  LFON res=Lfonalloc();
+    if (nfon !=NULL)
+      {
+        res->ID=Idalloc();
+        strcpy(res->ID,nfon);
+      }
+    res->PARAM=lparam;
+    res->VARLOC=lvars;
+    res->CORPS=com;
+    res->TYPE=tp;
+    res->SUIV=suiv;
+    return(res);
+}
+
+/* pointe vers une copie */
+extern LFON copier_fon(LFON lfn){
+  LFON lfon = NULL;
+  if(lfn != NULL)
+  {
+    lfon = Lfonalloc();
+    if(lfn->ID!=NULL)
+    {
+      lfon->ID=Idalloc();
+      strcpy(lfon->ID,lfn->ID);
+    }
+    lfon->PARAM=copier_bilenvty(lfn->PARAM);
+    lfon->VARLOC=copier_bilenvty(lfn->VARLOC);
+    lfon->CORPS=lfn->CORPS;
+    type_copy(&(lfon->TYPE), lfn->TYPE);
+    lfon->SUIV=copier_fon(lfn->SUIV);
+  }
+  return(lfon);
+}
+
+/* affiche une fonction */
+extern void ecrire_fon(LFON bfn){
+  if (bfn==NULL)
+      printf("fin de la biliste de fonction \n");
+  else{
+    printf("variable %s ",bfn->ID);
+    ecrire_bilenvty(bfn->PARAM);
+    ecrire_bilenvty(bfn->VARLOC);
+    //prefix(bfn->NOE);
+    ecrire_type(bfn->TYPE);
+    ecrire_fon(bfn->SUIV);
+  }
+}
+
+/* retourne la position de chaine*/
+extern LFON rechfon(char *chaine, LFON listident){
+  if(listident != NULL){
+    if(strcmp(listident->ID,chaine)==0)
+    {
+      return listident;
+    }
+    else{
+      return rechfon(chaine,listident->SUIV);
+    }
+  }
+  else
+    return NULL;
+}
+
+/*-------------------------------------------------------------------------------*/
+/*---------------------bilistes-de-fonctions --------------------------------*/
+
+/* retourne une biliste de fonction vide  */
+extern BILFON bilfon_vide(){
+  BILFON bfn;
+  bfn.debut=NULL;
+  bfn.fin=NULL;
+  return(bfn);
+}
+
+/* retourne une biliste a un element */
+extern BILFON creer_bilfon(LFON pfon){
+  BILFON bfn;
+  bfn.debut=pfon;
+  bfn.fin=pfon;
+  return(bfn);
+}
+
+ /* pointe vers une copie             */
+extern BILFON copier_bilfon(BILFON bfn){
+  LFON debutlfon, finlfon;
+  BILFON cbfn;
+  debutlfon=copier_fon(bfn.debut);
+  cbfn.debut=debutlfon;
+  finlfon=debutlfon;
+  while(finlfon && finlfon->SUIV)
+    finlfon=finlfon->SUIV;
+  cbfn.fin=finlfon;
+  return(cbfn);
+}
+
+/* retourne la concatenation*/
+extern BILFON concatfn(BILFON bfn1, BILFON bfn2){
+  BILFON bfn, nbfn1, nbfn2;
+  nbfn1 = copier_bilfon(bfn1);
+  nbfn2 = copier_bilfon(bfn2);
+  if(nbfn1.fin != NULL){
+    if(nbfn2.debut != NULL){
+      nbfn1.fin->SUIV=nbfn2.debut;
+      bfn.debut=nbfn1.debut;
+      bfn.fin=nbfn2.fin;
+      return(bfn);
+    }
+    else
+      return (nbfn1);
+  }
+  else
+    return (nbfn2);
+}
+
+/* les variables de bfon (params puis varloc)*/
+extern BILENVTY allvars(BILFON bfon){
+  BILENVTY benvty, paramEnvty, varLocal;
+  LFON current = copier_fon(bfon.debut);
+  paramEnvty = copier_bilenvty(current->PARAM);
+  varLocal = copier_bilenvty(current->VARLOC);
+
+  current = current->SUIV;
+  while(current != NULL) {
+      paramEnvty = concatty(paramEnvty, current->PARAM);
+      varLocal = concatty(varLocal, current->VARLOC);
+      current = current->SUIV;
+  }
+
+  benvty = concatty(paramEnvty, varLocal);
+  return benvty;
+}
+
+/* affiche la biliste de fonctions  */
+extern void ecrire_bilfon(BILFON bfn){
+  ecrire_fon(bfn.debut);
 }
 
 

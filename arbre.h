@@ -56,19 +56,47 @@ typedef struct nodeTypeTag {
     type o_type ;               /* type of the non-terminal or terminal like : integer, boolean, ... */
 } nodeType;
 
+/* listefonctions := liste de 4-tuples (ident, BILparametres, BILvarloc, ast) */
+typedef struct cellfon{
+  char *ID;
+  BILENVTY PARAM;    /* pametres formels  */
+  BILENVTY VARLOC;   /* variables locales */
+  nodeType* CORPS;
+  type TYPE;       /* type retour de la fonction */
+  struct cellfon *SUIV;} *LFON;
+
+/* biliste de fonctions */
+typedef struct{
+  LFON debut;
+  LFON fin;}BILFON;
+
 
 extern int yyerror(char* s);
-nodeType* con(int value, type type_con);
-nodeType* id(char* v, type type_id);
-nodeType* opr(int oper, int nops, type type_opr, ...);
 
 /*------------------FONCTIONS ---------------------------------------------------*/
+extern LFON creer_fon(char *nfon, BILENVTY lparam,BILENVTY lvars,nodeType* com,type tp, LFON suiv);
+/* pointe vers cette fonction */
+extern LFON copier_fon(LFON lfn);    /* pointe vers une copie                */
+extern void ecrire_fon(LFON bfn);
+extern LFON rechfon(char *chaine, LFON listident);/* retourne la position de chaine*/
+/*---------------------bilistes-de-fonctions --------------------------------*/
+extern BILFON bilfon_vide() ;                  /* retourne une biliste vide  */
+extern BILFON creer_bilfon(LFON pfon);  /* retourne une biliste a un element */
+extern BILFON copier_bilfon(BILFON bfn);/* pointe vers une copie             */
+extern BILFON concatfn(BILFON bfn1, BILFON bfn2);/* retourne la concatenation*/
+extern BILENVTY allvars(BILFON bfon);/*les variables de bfon (params puis varloc)*/
+extern void ecrire_bilfon(BILFON bfn);   /* affiche la biliste de fonctions  */
 
 /*---------------------allocation memoire----------------------------------------*/
 extern char *Idalloc();      /* retourne un tableau de MAXIDENT char             */
 extern ENVTY Envtalloc();    /* retourne un ENVTY                                */
 extern type *talloc();       /* retourne un pointeur sur type *                  */
+extern LFON Lfonalloc();     /* retourne une fonction@
+
 /*---------------------------------arbres----------------------------------------*/
+nodeType* con(int value, type type_con);
+nodeType* id(char* v, type type_id);
+nodeType* opr(int oper, int nops, type type_opr, ...);
 
 /*---------------------environnements--------------------------------------------*/
 extern int  type_eq(type t1, type t2);/* 1 si t1 ==t2 , 0 sinon                  */
