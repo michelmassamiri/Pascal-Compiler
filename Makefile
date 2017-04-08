@@ -57,11 +57,11 @@ anasem.o : anasem.c anasem.h ppascal.tab.h
 interpPP : ppascal.tab.o ppascal.yy.o arbre.o anasem.o
 			$(CC) $(CFLAGS) -o $@ $^
 
-rapport :
+rapport : rapport/rapport.tex
 		cd rapport/
-		pdflatex rapport.tex
-		pdflatex rapport.tex
+		pdflatex rapport/rapport.tex
+		pdflatex rapport/rapport.tex
 		cd ../
 
 clean :
-			rm -f *.tab.* *.o *.yy.c $(PROGS) *.output rapport/*.aux rapport/*.log rapport/*.pdf
+			rm -f *.tab.* *.o *.yy.c $(PROGS) *.output rapport/*.aux rapport/*.log rapport/*.pdf rapport/*.toc rapport.*
