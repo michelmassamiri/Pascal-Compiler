@@ -64,4 +64,4 @@ rapport : rapport/rapport.tex
 		cd ../
 
 clean :
-			rm -f *.tab.* *.o *.yy.c $(PROGS) *.output rapport/*.aux rapport/*.log rapport/*.pdf rapport.*
+			rm -f *.tab.* *.o *.yy.c $(PROGS) *.output rapport/*.aux rapport/*.log rapport/*.pdf rapport/*.toc rapport.*
