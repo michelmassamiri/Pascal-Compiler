@@ -83,7 +83,7 @@ F           : '(' E ')'                                            { $$ = $2; }
             | True                                                 { $$ = con(1, creer_type(0, T_boo)); }
             | False                                                { $$ = con(0, creer_type(0, T_boo)) ;}
             | V '(' L_args ')'                                     {;}
-            | NewAr TP '[' E ']'                                   { $$ = opr(NewAr, 2, $2, $4, NULL); ($$->o_type).DIM++ ; type_copy(&($$->o_type), $2); }
+            | NewAr TP '[' E ']'                                   { $$ = opr(NewAr, 2, $2, $4, NULL); type_copy(&($$->o_type), $2); ($$->o_type).DIM++; }
             | Et                                                   { $$ = $1 ; }
             ;
 
@@ -125,7 +125,7 @@ Argt        : V ':' TP                                            { vtycour=cree
 
 TP          : T_boo                                               { $$ = creer_type(0, T_boo); }
             | T_int                                               { $$ = creer_type(0, T_int); }
-            | T_ar TP                                             { $$.DIM++; type_copy(&($$), $2) ;}
+            | T_ar TP                                             { type_copy(&($$), $2); $$.DIM++;}
             ;
 
 L_vart      : %empty                                              { $$ = bilenvty_vide(); }

@@ -161,10 +161,9 @@ type calcul_type(BILENVTY rho_gb, nodeType* e, int ligne)
             case Af:
                 printf("%s\n", nomop(e->opr.op[0]->o_type.TYPEF));
                 printf("%s\n", nomop(e->opr.op[1]->o_type.TYPEF));
-                if(e->opr.op[0]->o_type.DIM != e->opr.op[1]->o_type.DIM) {
-                  printf("Dim de Var %d\n", e->opr.op[0]->o_type.DIM);
-                  printf("Dim de Fils droit %d\n", e->opr.op[1]->o_type.DIM);
-                }
+
+                printf("Dim de Var %d\n", e->opr.op[0]->o_type.DIM);
+                printf("Dim de Fils droit %d\n", e->opr.op[1]->o_type.DIM);
 
                 if (type_eq(e->opr.op[0]->o_type, e->opr.op[1]->o_type)==0)/* type(lhs) <> type(rhs)    */
                 {
