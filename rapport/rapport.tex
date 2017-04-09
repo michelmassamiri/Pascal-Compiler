@@ -202,8 +202,7 @@ Voici un exemple pour les oppérations à deux arguments :
         affect(environnement, q->RES,
                         eval(q->OP, valch(environnement, q->ARG1)
                                   , valch(environnement, q->ARG2)
-                            )
-               );
+                            ));
     }
 \end{lstlisting}
 
@@ -254,13 +253,58 @@ L'opérateur ret a l'effet inverse du call. Il commence par vérifier que le sta
 
 Sinon, le programme repart vers l'état qu'il avait avant le dernier call, en modifiant l'environnement à stack[stackLayer - 1] et en mettant la valeur de la QUAD a celle qui est la plus haute dans la pile temporaire.
 
-\subsubsection{Opérateurs d'affectaion}
+\subsubsection{Opérateurs d'affectation}
 
+Les opérateurs d'affectations on tous plus ou moins le même fonctionnenemt. En effet, que ce soit à partir de la valeur d'une variable ou d'un numéral, la seule chose qui change est la fonction qu'on utilise pour récuperer la valeur a affecté (valch() dans le cas d'une valeur de variable et atoi dans le cas d'un numéral).
+Cependant, une chose qui est importante de noter est la manière que nous avons utiliser pour traiter les tableaux.
+\medbreak
+Nous ne savions pas exactement comment traiter le cas de l'affectation depuis ou vers une case d'un tableau.
+Pour ce faire, nous avons raisonner de la manière suivante : les tableaux fonctionne comme les variables classiques, ils ont cependant une notation légèrement différente.
 
+Nous avons donc décider d'utiliser le système de notation existant. Pour insérer une valeur dans la variable X1[3], nous avons simpement creer une variable se nommant exactement "X1[3]".
+Du fait que les vriables ne peuvent être composées que de lettres et de nombres, il est impossibles pour l'utilisateur d'en créer une ayant cette forme.
+Ainsi, quand on utilise l'instruction AfInd, on concatène ARG1, '[', ARG2 et ']' pour créer ladite case du tableau.
 
+Si ARG2 est une variable, alors on utilise la valeur de ARG2, si c'est un numéral, on utilise le numéral tel quel, sinon on renvoit une erreur.
+Il ne reste plus qu'a assigner à cette variable la valeur souhaitée, qui se trouve dans la destination.
+
+De la même manière, nous récupérons ARG1[ARG2]
 
 \newpage
 \section{Compilateur Code à 3 Adresses}
+
+L'essentiel du fonctionnement du compilateur du code à trois adresses vers un langage assembleur est identique au fonctionnement de l'interpreteur.
+En effet, on lit le code puis on le stock dans une bi-liste de quadruplets. La différence réside au moment de traiter le code précédemment lu.
+
+Ici nous n'allons pas remplir des environnements comme nous l'avons fait précédemment, mais nous allons écrire les différentes instructions dans le langage machine, qui dans ce cas est le Y86.
+L'écriture du code Y86 se fait sur la sortie standard, via la fonction C "printf", que nous pouvons rediriger dans le but d'écrire le code directement dans un fichier.
+
+Le fait que l'écriture se fasse sur la sortie standard permet de tester plus simplement le programme sur des petits exemples.
+
+\bigbreak
+
+Une partie de cette conversion a été assez simple, dû au fait qu'il existe des correspondances dirrecte (ou en 2 instruction, en ajoutant mrmovl dans certains cas) pour certaines instruction :
+
+\begin{center}
+    \begin{tabular}{|c|c|}
+        \hline
+        Code C3A & Code Y86 \\
+        \hline
+        \hline
+        Jp & jmp\\ \hline
+        Jz & je\\ \hline
+        St & halt\\ \hline
+        Sk & nop\\ \hline
+        Pl & addl \\ \hline
+        Mo & subl \\ \hline
+        Call & call \\ \hline
+        Ret & ret \\ \hline
+        Param & pushl \\ \hline
+    \end{tabular}
+\end{center}
+
+
+Comme nous pouvons le voir, sur les 18 insructions du code à trois adresses, 9 sont traduisible immédiatement ou presque. A celles ci on peut ajouter le Mu, qui a été donner dans les exemples de code du projet.
 
 
 
