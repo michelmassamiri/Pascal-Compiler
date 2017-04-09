@@ -187,7 +187,7 @@ On obtient le résultat d'environnement suivant :
 Nous allons voir dans cette partie, de quelle manières nous avons choisit de programmer les différentes instructions de l'interpréteur.
 
 Il est a noté que pour ce faire, notre lexer, en fin d'exécution, "déroule" la biliste de quadruplet.
-\subsubsection{Opérations arithmétiques et logiques}
+\subsubsection{Opérations arithmétiques, logiques et comparatifs}
 Nous avons dans un premier temps traité les opération "simple", en commencant par les opérations arithmétiques et logiques.
 Pour ce faire nous avons récupérer les valeurs des variables depuit l'environnement, puis nous avons effectué l'opération en question sur ces deux variables et l'avons stocké dans la variable destination.
 
@@ -210,6 +210,22 @@ Voici un exemple pour les oppérations à deux arguments :
 Ici, dans q->OP se trouve l'opérateur, comme on l'a vu précédemment. Si l'opérateur est un correspond à une opération arithùétique ou logique, on affecte à la variable destination (q->RES) la valeur du résultat de l'opération (qui est effectué dans la fonction eval).
 \medbreak
 Dans le cas de l'opérateur Not, on cherche juste la valeur de la variable passée en ARG1, puis on effectue l'opération du not en C et stockons le résultat dans la variable destination.
+\medbreak
+L'operateur Lt (lower than), quand à lui, doit comparer deux valeurs. Il suffit donc de récupérer les valeurs des deux arguments et d'effectuer la comparaison :
+
+\begin{lstlisting}
+    if(q->OP == Pl || q->OP == Mu || q->OP == Mo
+                   || q->OP == And || q->OP == Or)
+    {
+        if(rech(q->RES, environnement) == NULL)
+            initenv(&environnement, q->RES);
+        if(valch(environnement, q->ARG1) < valch(environnement, q->ARG2))
+            affect(environnement, q->RES, 1);
+        else
+            affect(environnement, q->RES, 0);
+    }
+\end{lstlisting}
+
 
 \subsubsection{Opération de sauts, de non changement d'environnement et de fin de programme}
 
@@ -218,6 +234,30 @@ Les opération de jump sont programmés de manière a ce que, dans le cas on doi
 L'opération skip qui n'a aucun effet sur l'environnement, a tout simplement était laissé vide. On ne fait aucune opération, on se contente juste de passer à l'instruction suivante.
 \medbreak
 L'opération stop effectue un "return 0" dans le programme C, permettant de dire que le programme s'est terminé de manière normale.
+
+\subsubsection{Opérateurs pour les fonctions}
+
+Pour implémenter les appels de focntions en code à trois adresses, il a été nécessaire de créer une pile d'appel.
+Pour ce faire, nous avons céer un tableau d'environnements appelé stack. Stack[0] est l'environnement dans lequel nous n'avons pas encore appelé de fonctions.
+Toutes les cases du tableau sont initialiser à NULL pour éviter des problèmes d'erreurs de segmentation.
+
+De plus nous avons ajouter une variable servant de pointeur de pile, pour savoir à quel endroit nous en somme. Ce pointeur s'appelle stackLayer (ce nom est arbitraire).
+\bigbreak
+L'opérateur param fait en sorte d'ajouter dans le stack[stackLayer + 1] la variable de nom ARG1 et de valeur ARG2. Il a le même fonctionnement qu'un opérateur d'affectation, seulement il ne le fait pas dans le même environnement.
+\medbreak
+L'opérateur call permet de lancer une fonction débuttant à l'étiquette destination. Pour ce faire il a fallut commencer par vérifier que le stackLayer suivant ne dépasse pas la taille de la pile.
+Si c'était le cas, le programme s'arrête en retournant l'erreur "Stack Overflow"
+
+Une fois que cette vérification est faite, il suffit de modifier le QUAD courant vers l'étiquette, de stocker le SUIV du QUAD courant dans une pile de QUAD temporaire (pour y revenir plus tard), et de changer l'environnement courant par l'environnement stack[stackLayer + 1].
+\medbreak
+L'opérateur ret a l'effet inverse du call. Il commence par vérifier que le stackLayer n'est pas à 0. Si c'était le cas ret aurait le même effet que le stop.
+
+Sinon, le programme repart vers l'état qu'il avait avant le dernier call, en modifiant l'environnement à stack[stackLayer - 1] et en mettant la valeur de la QUAD a celle qui est la plus haute dans la pile temporaire.
+
+\subsubsection{Opérateurs d'affectaion}
+
+
+
 
 \newpage
 \section{Compilateur Code à 3 Adresses}
