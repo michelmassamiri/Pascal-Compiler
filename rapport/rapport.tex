@@ -52,7 +52,9 @@ On utilise aussi le fichier bilquad.c permettant de créer des bi-listes de quad
 Les environnements, quadruplets et bi-listes de quadruplets seront définits plus loins. Nous allons commencer par voir la structure du code à trois adresses.
 
 
-\subsection{Structure du code à trois adresses}
+\subsection{Eléments donnés}
+Nous allons d'abord passer en revue les éléments qui nous ont été donnés pour pouvoir faire ce projet. Ces éléments sont les bi-listes de quadruplets, les quadruplets, les environnements et la structure du code.
+\subsubsection{Structure du code à trois adresses}
 
 Le code à trois adresses se compose de cinq éléments :
 \begin{itemize}
@@ -96,7 +98,8 @@ L'opérateur indique quelle opération va être effectué. Les différents opér
   St & Stop & Termine l'exécution du programme\\  \hline
 \end{tabular}
 
-\bigbreak
+\newpage
+
 Ainsi, avec tous ces opérateurs, un programme permettant de calculer 4 + 5 serait :
 \begin{lstlisting}
     ET0 :Afc :4 : :X1
@@ -128,9 +131,7 @@ Dans le but d'illustrer l'utilisation des fonctions, voici un bout de code perme
     ET16 :St : : :
 \end{lstlisting}
 
-\subsection{Les environnements}
-
-\subsection{Quadruplets et Bi-listes de quadruplets}
+\subsubsection{Quadruplets et Bi-listes de quadruplets}
 
 Ces quadruplets servent à stocker les différentes instructions du programme en code à trois adresses. Un quadruplet est définit comme :
 
@@ -140,6 +141,48 @@ Ces quadruplets servent à stocker les différentes instructions du programme en
 \item Un triplet de noms, permettant de définir les deux arguments et la destination e l'opération (char * ARG1, * ARG2, * RES)
 \item Le quadruplet suivant (struct cellquad SUIV)
 \end{itemize}
+
+Les étiquettes correspondes aux étiquettes données dans le code à trois adresses. Elles sont donc de la forme ETn où n est un nombre.
+
+Les opérateurs sont définit dans un fichier à part. Ce sont des entiers positifs dont la valeur est comprise entre 257 et 310.
+
+Le triplet de noms correspond soit aux noms des arguments et du résultat, soit à des numéraux.
+
+Le quadruplet SUIV permet de construire la simple-liste de quadruplets.
+
+\subsubsection{Les environnements}
+
+Les environnements sont ce qui rend l'interpreteur utilisable. Ils permettent de stocker les variables et leur valeur.
+En fin d'éxécution de l'interpréteur, on voit s'afficher le résultat de l'éxécution, avec la valeur de chaque variables.
+
+Un environnement est une liste de couples. Une cellule environnement est donc définie par le triplet suivant :
+
+\begin{itemize}
+\item Le nom de la variable (char * ID)
+\item La valeur de la variable (int VAL)
+\item La cellule suivante (ENV *SUIV)
+\end{itemize}
+
+\bigbreak
+Par exemple, pour le code qui calcul la différence entre 5 et 2 suivant :
+\begin{lstlisting}
+    ET0 :Afc :2 : :X1
+    ET1 :Afc :5 : :X2
+    ET3 :Mo :X2 :X1 :X3
+    ET4 :St : : :
+\end{lstlisting}
+
+On obtient le résultat d'environnement suivant :
+
+\begin{lstlisting}
+    variable X3 valeur 3
+    variable X2 valeur 5
+    variable X1 valeur 2
+    fin d' environnement
+\end{lstlisting}
+
+
+\subsection{Eléments programmés}
 
 \newpage
 \section{Compilateur Code à 3 Adresses}
