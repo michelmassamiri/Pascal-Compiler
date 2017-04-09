@@ -65,6 +65,12 @@ typedef struct cellfon{
   type TYPE;       /* type retour de la fonction */
   struct cellfon *SUIV;} *LFON;
 
+typedef struct entete_fon {
+  char* ID;
+  BILENVTY PARAM;
+  type TYPE;
+} *ENTFON;
+
 /* biliste de fonctions */
 typedef struct{
   LFON debut;
@@ -75,9 +81,9 @@ extern int yyerror(char* s);
 
 /*------------------FONCTIONS ---------------------------------------------------*/
 extern LFON creer_fon(char *nfon, BILENVTY lparam,BILENVTY lvars,nodeType* com,type tp);
-extern LFON creer_proc(char *nproc, BILENVTY lparam,BILENVTY lvars,nodeType* com);
-extern LFON creer_entfon(char *nfon, BILENVTY lparam, type tp);
-extern LFON creer_entproc(char *nproc, BILENVTY lparam);
+extern LFON creer_proc(char *nproc, BILENVTY lparam,BILENVTY lvars,nodeType* com,type tp);
+extern ENTFON creer_entfon(char *nfon, BILENVTY lparam, type tp);
+extern ENTFON creer_entproc(char *nproc, BILENVTY lparam, type tp);
 /* pointe vers cette fonction */
 extern LFON copier_fon(LFON lfn);    /* pointe vers une copie                */
 extern void ecrire_fon(LFON bfn);
@@ -94,7 +100,8 @@ extern void ecrire_bilfon(BILFON bfn);   /* affiche la biliste de fonctions  */
 extern char *Idalloc();      /* retourne un tableau de MAXIDENT char             */
 extern ENVTY Envtalloc();    /* retourne un ENVTY                                */
 extern type *talloc();       /* retourne un pointeur sur type *                  */
-extern LFON Lfonalloc();     /* retourne une fonction@
+extern LFON Lfonalloc();     /* retourne une fonction */
+extern ENTFON EntFonalloc(); /* retourne une en-tete de fonction */
 
 /*---------------------------------arbres----------------------------------------*/
 nodeType* con(int value, type type_con);
@@ -124,7 +131,7 @@ extern BILENVTY copier_bilenvty(BILENVTY bty);/*pointe vers copie               
 extern BILENVTY concatty(BILENVTY bty1, BILENVTY bty2);/* retourne la concatenation*/
 extern void ecrire_bilenvty(BILENVTY bty); /* affiche la biliste de quadruplets  */
 /*---------------------programmes -----------------------------------------------*/
-void ecrire_prog(BILENVTY argby,nodeType* argno);             /* affiche le programme  */
+void ecrire_prog(BILENVTY argby,BILFON bilfon,nodeType* argno);             /* affiche le programme  */
 /* --------------------CONSTANTES -----------------------------------------------*/
 #define MAXIDENT 16          /* long max d'un identificateur de variable         */
 /*---------------------VARIABLES globales ---------------------------------------*/
