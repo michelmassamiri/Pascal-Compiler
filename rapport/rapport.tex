@@ -184,6 +184,41 @@ On obtient le résultat d'environnement suivant :
 
 \subsection{Eléments programmés}
 
+Nous allons voir dans cette partie, de quelle manières nous avons choisit de programmer les différentes instructions de l'interpréteur.
+
+Il est a noté que pour ce faire, notre lexer, en fin d'exécution, "déroule" la biliste de quadruplet.
+\subsubsection{Opérations arithmétiques et logiques}
+Nous avons dans un premier temps traité les opération "simple", en commencant par les opérations arithmétiques et logiques.
+Pour ce faire nous avons récupérer les valeurs des variables depuit l'environnement, puis nous avons effectué l'opération en question sur ces deux variables et l'avons stocké dans la variable destination.
+
+Voici un exemple pour les oppérations à deux arguments :
+
+\begin{lstlisting}
+    if(q->OP == Pl || q->OP == Mu || q->OP == Mo
+                   || q->OP == And || q->OP == Or)
+    {
+        if(rech(q->RES, environnement) == NULL)
+            initenv(&environnement, q->RES);
+        affect(environnement, q->RES,
+                        eval(q->OP, valch(environnement, q->ARG1)
+                                  , valch(environnement, q->ARG2)
+                            )
+               );
+    }
+\end{lstlisting}
+
+Ici, dans q->OP se trouve l'opérateur, comme on l'a vu précédemment. Si l'opérateur est un correspond à une opération arithùétique ou logique, on affecte à la variable destination (q->RES) la valeur du résultat de l'opération (qui est effectué dans la fonction eval).
+\medbreak
+Dans le cas de l'opérateur Not, on cherche juste la valeur de la variable passée en ARG1, puis on effectue l'opération du not en C et stockons le résultat dans la variable destination.
+
+\subsubsection{Opération de sauts, de non changement d'environnement et de fin de programme}
+
+Les opération de jump sont programmés de manière a ce que, dans le cas on doit faire un saut, le quadruplet que nous allons lire a la prochaine itération de la boucle, sera non pas le suivant du quadruplet actuel, mais celui dont l'étiquette est désigné par la destinantion.
+\medbreak
+L'opération skip qui n'a aucun effet sur l'environnement, a tout simplement était laissé vide. On ne fait aucune opération, on se contente juste de passer à l'instruction suivante.
+\medbreak
+L'opération stop effectue un "return 0" dans le programme C, permettant de dire que le programme s'est terminé de manière normale.
+
 \newpage
 \section{Compilateur Code à 3 Adresses}
 

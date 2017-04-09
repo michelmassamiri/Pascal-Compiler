@@ -100,6 +100,10 @@ LFON Lfonalloc(){
   return ((LFON)malloc(sizeof(struct cellfon)));
 }
 
+ENTFON EntFonalloc(){
+  return ((ENTFON)malloc(sizeof(struct entete_fon)));
+}
+
 /*-------------------------------------------------------------------*/
 /*-----------------------------environnements------------------------*/
 /* 1 si t1 ==t2 , 0 sinon                   */
@@ -415,7 +419,7 @@ extern LFON creer_fon(char *nfon, BILENVTY lparam,BILENVTY lvars,nodeType* com,t
     return(res);
 }
 
-extern LFON creer_proc(char *nproc, BILENVTY lparam,BILENVTY lvars,nodeType* com){
+extern LFON creer_proc(char *nproc, BILENVTY lparam,BILENVTY lvars,nodeType* com, type tp){
   LFON res=Lfonalloc();
     if (nproc !=NULL)
       {
@@ -425,12 +429,13 @@ extern LFON creer_proc(char *nproc, BILENVTY lparam,BILENVTY lvars,nodeType* com
     res->PARAM=lparam;
     res->VARLOC=lvars;
     res->CORPS=com;
+    res->TYPE = tp;
 
     return(res);
 }
 
-extern LFON creer_entfon(char *nfon, BILENVTY lparam, type tp) {
-  LFON res = Lfonalloc();
+extern ENTFON creer_entfon(char *nfon, BILENVTY lparam, type tp) {
+  ENTFON res = EntFonalloc();
   if(nfon != NULL) {
     res->ID = Idalloc();
     strcpy(res->ID, nfon);
@@ -442,14 +447,15 @@ extern LFON creer_entfon(char *nfon, BILENVTY lparam, type tp) {
   return res;
 }
 
-extern LFON creer_entproc(char *nproc, BILENVTY lparam) {
-  LFON res = Lfonalloc();
+extern ENTFON creer_entproc(char *nproc, BILENVTY lparam, type tp) {
+  ENTFON res = EntFonalloc();
   if(nproc != NULL) {
     res->ID = Idalloc();
     strcpy(res->ID, nproc);
   }
 
   res->PARAM = lparam ;
+  res->TYPE = tp;
 
   return res;
 }
@@ -580,11 +586,14 @@ extern void ecrire_bilfon(BILFON bfn){
 
 /*-------------------------------------------------------------------------------*/
 /*---------------------programmes -----------------------------------------------*/
-void ecrire_prog(BILENVTY argby,nodeType* argno)
+void ecrire_prog(BILENVTY argby, BILFON bilfon, nodeType* argno)
 {
   printf("Les variables globales:\n");
   printf("------------------------:\n");
   ecrire_bilenvty(argby);printf("\n");
+  printf("La Listes des fonctions:\n");
+  printf("------------------------:\n");
+  ecrire_bilfon(bilfon); printf("\n");
   printf("Le programme principal:\n");
   printf("------------------------:\n");
   //prefix(argno);printf("\n");

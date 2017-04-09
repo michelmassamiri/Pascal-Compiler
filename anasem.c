@@ -20,13 +20,17 @@ void typ_error(char *mess,int ligne)
 /* suppose corrects les types des fils                                         */
 /* envoie message d'erreur si mal type a la racine et fils bien types          */
 /* renvoie T_err si l'arbre est mal-type                                       */
-type calcul_type(BILENVTY rho_gb, nodeType* e, int ligne)
+type calcul_type(BILENVTY rho_gb, ENTFON ent_fon, BILENVTY varloc, nodeType* e, int ligne)
 {
   type tp;
   tp= creer_type(0,T_bot);/* type par defaut */
   if(e != NULL)
   {
-    ENVTY pos;
+    ENVTY pos, pos_param, pos_varloc;
+    pos = NULL ;
+    pos_param = NULL ;
+    pos_varloc = NULL ;
+
     type tint, tboo, tcom, tthen;
     type tfg,tfd;                /* type  du fils gauche, fils droit */
     type terr=creer_type(0,T_err);   /* type  erreur                 */
@@ -46,11 +50,34 @@ type calcul_type(BILENVTY rho_gb, nodeType* e, int ligne)
           return tp;
 
       case typeId:
-          pos = rechty(e->id.v, rho_gb.debut);               /* pos var dans rho */
+          pos = rechty(e->id.v, rho_gb.debut);
+
+          if(ent_fon != NULL)
+            pos_param = rechty(e->id.v, ent_fon->PARAM.debut);
+
+          if(varloc.debut != NULL && varloc.fin != NULL)
+            pos_varloc = rechty(e->id.v, varloc.debut);
+
+          /* pos var dans rho (environnement global) */
           if (pos!=NULL)
           {
             type_copy(&tp, pos->TYPE);        /* valeur du  type := rho(var)      */
             type_copy(&(e->o_type), pos->TYPE);/* affecte le type                  */
+            return tp;
+          }
+          /* variable trouve dans la liste de parametres */
+          else if (pos_param != NULL)
+          {
+            type_copy(&tp, pos_param->TYPE);
+            type_copy(&(e->o_type), pos_param->TYPE);
+            return tp;
+          }
+          /* variable trouve dans la liste de variable locales de la fonction */
+          else if(pos_varloc != NULL)
+          {
+            type_copy(&tp, pos_varloc->TYPE);
+            type_copy(&(e->o_type), pos_varloc->TYPE);
+            return tp;
           }
           else
           {
@@ -159,11 +186,11 @@ type calcul_type(BILENVTY rho_gb, nodeType* e, int ligne)
                 return(tp);
 
             case Af:
-                printf("%s\n", nomop(e->opr.op[0]->o_type.TYPEF));
-                printf("%s\n", nomop(e->opr.op[1]->o_type.TYPEF));
+                //printf("%s\n", nomop(e->opr.op[0]->o_type.TYPEF));
+                //printf("%s\n", nomop(e->opr.op[1]->o_type.TYPEF));
 
-                printf("Dim de Var %d\n", e->opr.op[0]->o_type.DIM);
-                printf("Dim de Fils droit %d\n", e->opr.op[1]->o_type.DIM);
+                //printf("Dim de Var %d\n", e->opr.op[0]->o_type.DIM);
+                //printf("Dim de Fils droit %d\n", e->opr.op[1]->o_type.DIM);
 
                 if (type_eq(e->opr.op[0]->o_type, e->opr.op[1]->o_type)==0)/* type(lhs) <> type(rhs)    */
                 {

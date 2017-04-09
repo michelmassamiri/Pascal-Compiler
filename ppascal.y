@@ -18,6 +18,8 @@
   ENVTY vtycour;        /* Current typed var */
   BILFON bfon;          /* Table de symobole des fonctions */
   LFON ftcour;          /* Fonction actuelle */
+  ENTFON entcour;       /* En-tet de la fonction actuelle */
+  BILENVTY varloc;      /* Liste des variables locales */
 
 %}
 
@@ -28,8 +30,9 @@
     nodeType* NODE; // the node type. Ex : I, V, operator
     type TYP; // the expression type of the node. Ex : integer, boolean, Commande...
     BILENVTY LARGT; // the symobole table ;
-    LFON FonCel; // La cellule de la fonction
+    //LFON FonCel; // La cellule de la fonction
     BILFON FonTable; // La table de symboles des fonctions
+    ENTFON EnteteFon; // L'en-tete de la fonction
 };
 
 %start MP
@@ -57,8 +60,8 @@
 /* Definir les non-terminals */
 %type<NODE> MP c C E T F Et
 %type<TYP> TP
+%type<EnteteFon> D_entp D_entf
 %type<LARGT> Argt L_vart L_vartnn L_argt L_argtnn
-%type<FonCel> D_entp D_entf
 %type<FonTable> LD D
 
 
@@ -66,26 +69,26 @@
 
 %%
 
-MP          : L_vart {benvty = $1;} LD C                           { syntree = $4; /* printf("la Syntax est vraie\n") ;*/ YYACCEPT;}
+MP          : L_vart {benvty = $1;} LD {bfon = $3;} C                           { syntree = $5; /* printf("la Syntax est vraie\n") ;*/ YYACCEPT;}
             ;
 
-E           : E Pl T                                               { $$ = opr(Pl, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $$, line); }
-            | E Mo T                                               { $$ = opr(Mo, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $$, line); }
-            | E Mu T                                               { $$ = opr(Mu, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $$, line); }
-            | E Or T                                               { $$ = opr(Or, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $$, line); }
-            | E Lt T                                               { $$ = opr(Lt, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $$, line); }
-            | E Eq T                                               { $$ = opr(Eq, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $$, line); }
+E           : E Pl T                                               { $$ = opr(Pl, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
+            | E Mo T                                               { $$ = opr(Mo, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
+            | E Mu T                                               { $$ = opr(Mu, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
+            | E Or T                                               { $$ = opr(Or, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
+            | E Lt T                                               { $$ = opr(Lt, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
+            | E Eq T                                               { $$ = opr(Eq, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
             | T                                                    { $$ = $1; }
             ;
 
-T           : T And F                                              { $$ = opr(And, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $$, line); }
-            | Not F                                                { $$ = opr(Not, 2, creer_type(0, T_bot), $2, NULL); calcul_type(benvty, $$, line); }
+T           : T And F                                              { $$ = opr(And, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
+            | Not F                                                { $$ = opr(Not, 2, creer_type(0, T_bot), $2, NULL); calcul_type(benvty, entcour, varloc, $$, line); }
             | F                                                    { $$ = $1; }
             ;
 
 F           : '(' E ')'                                            { $$ = $2; }
             | I                                                    { $$ = con($1, creer_type(0, T_int)); }
-            | V                                                    { $$ = $1; calcul_type(benvty, $$, line); }
+            | V                                                    { $$ = $1; calcul_type(benvty, entcour, varloc, $$, line); }
             | True                                                 { $$ = con(1, creer_type(0, T_boo)); }
             | False                                                { $$ = con(0, creer_type(0, T_boo)) ;}
             | V '(' L_args ')'                                     {;}
@@ -93,20 +96,20 @@ F           : '(' E ')'                                            { $$ = $2; }
             | Et                                                   { $$ = $1 ; }
             ;
 
-Et          : V '[' E ']'                                          { $$ = opr(Ind, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $1, line); calcul_type(benvty, $$, line); }
-            | Et '[' E ']'                                         { $$ = opr(Ind, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $$, line); }
+Et          : V '[' E ']'                                          { $$ = opr(Ind, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $1, line); calcul_type(benvty, entcour, varloc, $$, line); }
+            | Et '[' E ']'                                         { $$ = opr(Ind, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
             ;
 
-C           : C Se c                                               { $$ = opr(Se, 2, creer_type(0, T_bot), $1, $3);  calcul_type(benvty, $$, line); }
+C           : C Se c                                               { $$ = opr(Se, 2, creer_type(0, T_bot), $1, $3);  calcul_type(benvty, entcour, varloc, $$, line); }
             | c                                                    { $$ = $1; }
             ;
 
-c           : Et Af E                                              { $$ = opr(Af, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $$, line); }
-            | V Af E                                               { $$ = opr(Af, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, $1, line); calcul_type(benvty, $$, line);}
-            | Sk                                                   { $$ = opr(Sk, 2, creer_type(0, T_com), NULL, NULL); }
+c           : Et Af E                                              { $$ = opr(Af, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
+            | V Af E                                               { $$ = opr(Af, 2, creer_type(0, T_bot), $1, $3); calcul_type(benvty, entcour, varloc, $1, line); calcul_type(benvty, entcour, varloc, $$, line);}
+            | Sk                                                   { $$ = opr(Sk, 2, creer_type(0, T_com), NULL, NULL); type tcom = creer_type(0, T_com); type_copy(&($$->o_type), tcom); }
             | '{' C '}'                                            { $$ = $2 ; }
-            | If E Th C El c                                       { $$ = opr(If, 3, creer_type(0, T_bot), $2, $4, $6); calcul_type(benvty, $$, line); }
-            | Wh E Do c                                            { $$ = opr(Wh, 2, creer_type(0, T_bot), $2, $4); calcul_type(benvty, $$, line); }
+            | If E Th C El c                                       { $$ = opr(If, 3, creer_type(0, T_bot), $2, $4, $6); calcul_type(benvty, entcour, varloc, $$, line); }
+            | Wh E Do c                                            { $$ = opr(Wh, 2, creer_type(0, T_bot), $2, $4); calcul_type(benvty, entcour, varloc, $$, line); }
             | V '(' L_args ')'                                     {;}
             ;
 
@@ -142,14 +145,14 @@ L_vartnn    : Var Argt                                            { $$ = $2 ;}
             | L_vartnn ',' Var Argt                               { $$ = concatty($1,$4); }
             ;
 
-D_entp      : Dep NPro '(' L_argt ')'                             { $$ = creer_entproc($2, $4); }
+D_entp      : Dep NPro '(' L_argt ')'                             { entcour = creer_entproc($2, $4, creer_type(0, T_bot)); $$ = entcour; }
             ;
 
-D_entf      : Def NFon '(' L_argt ')' ':' TP                      { $$ = creer_entfon($2, $4, $7); }
+D_entf      : Def NFon '(' L_argt ')' ':' TP                      { entcour = creer_entfon($2, $4, $7); $$ = entcour; }
             ;
 
-D           : D_entp L_vart C                                     { ftcour = creer_proc($1->ID, $1->PARAM, $2, $3); $$ = creer_bilfon(ftcour);}
-            | D_entf L_vart C                                     { ftcour = creer_fon($1->ID, $1->PARAM, $2, $3, $1->TYPE); $$ = creer_bilfon(ftcour); }
+D           : D_entp { entcour = $1; } L_vart { varloc = $3; } C  { ftcour = creer_proc($1->ID, $1->PARAM, $3, $5, $1->TYPE); $$ = creer_bilfon(ftcour); varloc = bilenvty_vide(); entcour = NULL ; }
+            | D_entf { entcour = $1; } L_vart { varloc = $3; } C  { ftcour = creer_fon($1->ID, $1->PARAM, $3, $5, $1->TYPE); $$ = creer_bilfon(ftcour); varloc = bilenvty_vide();  entcour = NULL ;}
             ;
 
 LD          : %empty                                              { $$ = bilfon_vide(); }
@@ -164,13 +167,14 @@ int yyerror(char* s){
 }
 
 int main() {
+   varloc = bilenvty_vide();
    yyparse();
 
-   ecrire_prog(benvty, syntree);
+   ecrire_prog(benvty, bfon, syntree);
    type terr=creer_type(0,T_err);
    type tcom= creer_type(0,T_com);
 
-   if (type_eq(syntree->o_type,terr))
+   if (type_eq(syntree->o_type, terr))
       printf("erreur de typage\n");
    else if (type_eq(syntree->o_type,tcom))
       printf("programme bien type\n");
