@@ -37,16 +37,16 @@ int ex_bis(ENV *e, nodeType *p)
         {
         case Wh:
             snprintf(buf1, 20, "JMP%d", lbJMP1 = lbJMP++);
-            printf("%s\t:%s\t:%s\t:%s\t:%s\n", buf1, "Sk", "", "", "");
-            ex_bis(e, p->opr.op[0]);
+            printf("%s\t:%s\t:%s\t:%s\t:%s\n", buf1, "Sk", "", "", ""); // Début du while, on place un point de JMP
+            ex_bis(e, p->opr.op[0]);                                    // On évalue la condition
             snprintf(buf2, 20, "CT%d", currentC);
             snprintf(buf3, 20, "JMP%d", lbJMP2 = lbJMP++);
-            print(current++, "Jz", buf2, NULL, buf3);
-            ex_bis(e, p->opr.op[1]);
-            print(current++, "Jp", NULL, NULL, buf1);
-            printf("%s\t:%s\t:%s\t:%s\t:%s\n", buf3, "Sk", "", "", "");
+            print(current++, "Jz", buf2, NULL, buf3);                   // Si la condi est mauvaise on saute à la fin
+            ex_bis(e, p->opr.op[1]);                                    // Sinon on execute le Do
+            print(current++, "Jp", NULL, NULL, buf1);                   // Retour au début du while
+            printf("%s\t:%s\t:%s\t:%s\t:%s\n", buf3, "Sk", "", "", ""); // Après le while
 
-            return 0;
+            break;
         case If:
             ex_bis(e, p->opr.op[0]);
             snprintf(buf1, 20, "CT%d", currentC);
@@ -58,7 +58,7 @@ int ex_bis(ENV *e, nodeType *p)
             printf("%s\t:%s\t:%s\t:%s\t:%s\n", buf2, "Sk", "", "", "");
             ex_bis(e, p->opr.op[2]);
             printf("%s\t:%s\t:%s\t:%s\t:%s\n", buf3, "Sk", "", "", "");
-            return 0;
+            break;
         case Af:
             ex_bis(e, p->opr.op[1]);
             snprintf(buf1, 20, "CT%d", currentC);
@@ -117,11 +117,29 @@ int ex_bis(ENV *e, nodeType *p)
             print(current++, "Ind", buf1, buf2, dest);
             break;
 
+        case AfInd:
+            ex_bis(e, p->opr.op[0]);
+            leftCurrent = currentC;
+            ex_bis(e, p->opr.op[1]);
+            snprintf(buf1, 20, "CT%d", leftCurrent);
+            snprintf(buf2, 20, "CT%d", currentC);
+            snprintf(dest, 20, "CT%d", ++currentC);
+            print(current++, "AfInd", buf1, buf2, dest);
+            break;
         case Param:
+            ex_bis(e, p->opr.op[0]);
+            leftCurrent = currentC;
+            ex_bis(e, p->opr.op[1]);
+            snprintf(buf1, 20, "CT%d", leftCurrent);
+            snprintf(buf2, 20, "CT%d", currentC);
+            print(current++, "Param", buf1, buf2, NULL);
             break;
         case Call:
             break;
 
+        case Ret:
+
+            break;
         case Pl:
             ex_bis(e, p->opr.op[0]);
             leftCurrent = currentC;
