@@ -120,7 +120,7 @@ BILQUAD bq;
 
 %%
 
-int isnumber(char * chaine)
+int isNumber(char * chaine)
 {
     int l = strlen(chaine);
     for(int i = 0; i < l; ++i)
@@ -208,7 +208,7 @@ int main(int ac, char** av)
                 sprintf(arg2, "%d", index);
                 strcat(varName, arg2);
             }
-            else if(isnumber(q->ARG2))
+            else if(isNumber(q->ARG2))
                 strcat(varName, q->ARG2);
             else
             {
@@ -233,7 +233,7 @@ int main(int ac, char** av)
                 sprintf(arg2, "%d", index);
                 strcat(varName, arg2);
             }
-            else if(isnumber(q->ARG2))
+            else if(isNumber(q->ARG2))
                 strcat(varName, q->ARG2);
             else
             {

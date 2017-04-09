@@ -52,7 +52,9 @@ On utilise aussi le fichier bilquad.c permettant de créer des bi-listes de quad
 Les environnements, quadruplets et bi-listes de quadruplets seront définits plus loins. Nous allons commencer par voir la structure du code à trois adresses.
 
 
-\subsection{Structure du code à trois adresses}
+\subsection{Eléments donnés}
+Nous allons d'abord passer en revue les éléments qui nous ont été donnés pour pouvoir faire ce projet. Ces éléments sont les bi-listes de quadruplets, les quadruplets, les environnements et la structure du code.
+\subsubsection{Structure du code à trois adresses}
 
 Le code à trois adresses se compose de cinq éléments :
 \begin{itemize}
@@ -96,7 +98,8 @@ L'opérateur indique quelle opération va être effectué. Les différents opér
   St & Stop & Termine l'exécution du programme\\  \hline
 \end{tabular}
 
-\bigbreak
+\newpage
+
 Ainsi, avec tous ces opérateurs, un programme permettant de calculer 4 + 5 serait :
 \begin{lstlisting}
     ET0 :Afc :4 : :X1
@@ -128,9 +131,7 @@ Dans le but d'illustrer l'utilisation des fonctions, voici un bout de code perme
     ET16 :St : : :
 \end{lstlisting}
 
-\subsection{Les environnements}
-
-\subsection{Quadruplets et Bi-listes de quadruplets}
+\subsubsection{Quadruplets et Bi-listes de quadruplets}
 
 Ces quadruplets servent à stocker les différentes instructions du programme en code à trois adresses. Un quadruplet est définit comme :
 
@@ -140,6 +141,83 @@ Ces quadruplets servent à stocker les différentes instructions du programme en
 \item Un triplet de noms, permettant de définir les deux arguments et la destination e l'opération (char * ARG1, * ARG2, * RES)
 \item Le quadruplet suivant (struct cellquad SUIV)
 \end{itemize}
+
+Les étiquettes correspondes aux étiquettes données dans le code à trois adresses. Elles sont donc de la forme ETn où n est un nombre.
+
+Les opérateurs sont définit dans un fichier à part. Ce sont des entiers positifs dont la valeur est comprise entre 257 et 310.
+
+Le triplet de noms correspond soit aux noms des arguments et du résultat, soit à des numéraux.
+
+Le quadruplet SUIV permet de construire la simple-liste de quadruplets.
+
+\subsubsection{Les environnements}
+
+Les environnements sont ce qui rend l'interpreteur utilisable. Ils permettent de stocker les variables et leur valeur.
+En fin d'éxécution de l'interpréteur, on voit s'afficher le résultat de l'éxécution, avec la valeur de chaque variables.
+
+Un environnement est une liste de couples. Une cellule environnement est donc définie par le triplet suivant :
+
+\begin{itemize}
+\item Le nom de la variable (char * ID)
+\item La valeur de la variable (int VAL)
+\item La cellule suivante (ENV *SUIV)
+\end{itemize}
+
+\bigbreak
+Par exemple, pour le code qui calcul la différence entre 5 et 2 suivant :
+\begin{lstlisting}
+    ET0 :Afc :2 : :X1
+    ET1 :Afc :5 : :X2
+    ET3 :Mo :X2 :X1 :X3
+    ET4 :St : : :
+\end{lstlisting}
+
+On obtient le résultat d'environnement suivant :
+
+\begin{lstlisting}
+    variable X3 valeur 3
+    variable X2 valeur 5
+    variable X1 valeur 2
+    fin d' environnement
+\end{lstlisting}
+
+
+\subsection{Eléments programmés}
+
+Nous allons voir dans cette partie, de quelle manières nous avons choisit de programmer les différentes instructions de l'interpréteur.
+
+Il est a noté que pour ce faire, notre lexer, en fin d'exécution, "déroule" la biliste de quadruplet.
+\subsubsection{Opérations arithmétiques et logiques}
+Nous avons dans un premier temps traité les opération "simple", en commencant par les opérations arithmétiques et logiques.
+Pour ce faire nous avons récupérer les valeurs des variables depuit l'environnement, puis nous avons effectué l'opération en question sur ces deux variables et l'avons stocké dans la variable destination.
+
+Voici un exemple pour les oppérations à deux arguments :
+
+\begin{lstlisting}
+    if(q->OP == Pl || q->OP == Mu || q->OP == Mo
+                   || q->OP == And || q->OP == Or)
+    {
+        if(rech(q->RES, environnement) == NULL)
+            initenv(&environnement, q->RES);
+        affect(environnement, q->RES,
+                        eval(q->OP, valch(environnement, q->ARG1)
+                                  , valch(environnement, q->ARG2)
+                            )
+               );
+    }
+\end{lstlisting}
+
+Ici, dans q->OP se trouve l'opérateur, comme on l'a vu précédemment. Si l'opérateur est un correspond à une opération arithùétique ou logique, on affecte à la variable destination (q->RES) la valeur du résultat de l'opération (qui est effectué dans la fonction eval).
+\medbreak
+Dans le cas de l'opérateur Not, on cherche juste la valeur de la variable passée en ARG1, puis on effectue l'opération du not en C et stockons le résultat dans la variable destination.
+
+\subsubsection{Opération de sauts, de non changement d'environnement et de fin de programme}
+
+Les opération de jump sont programmés de manière a ce que, dans le cas on doit faire un saut, le quadruplet que nous allons lire a la prochaine itération de la boucle, sera non pas le suivant du quadruplet actuel, mais celui dont l'étiquette est désigné par la destinantion.
+\medbreak
+L'opération skip qui n'a aucun effet sur l'environnement, a tout simplement était laissé vide. On ne fait aucune opération, on se contente juste de passer à l'instruction suivante.
+\medbreak
+L'opération stop effectue un "return 0" dans le programme C, permettant de dire que le programme s'est terminé de manière normale.
 
 \newpage
 \section{Compilateur Code à 3 Adresses}
