@@ -161,6 +161,18 @@ Nous avons donc le programme qui est entré par l'utilisateur dans l'interpréte
 Si tel est le cas, on donne une valeur à chaque expression, et on vérifie si le typage est correcte.
 Puis le tout est stocké dans des environnements de noeuds, permettant d'avoir le résultat de l'éxécution en fin de programme.
 
+\bigbreak
+
+Les parties dans cette section qu'on n'a pas eu le temps de gérer, c'était le fait d'appeler une fonction.
+Dans l'interpréteur ce n'est pas compliqué, il suffit de tester si la fonction est dans la liste des fonctions (BILFON) en recherchant son ID dans la liste. Si on trouve la fonction, on l'appelle l'interpréteur récursivement en exécutant le corps de la fonction.
+
+\bigbreak
+
+Enfin, les difficultés rencontrées étaient le fait de gérer des variables locales dans les fonctions pour la sémantique. Ceci dit que la variable locale dans la fonction n'est utilisée qu’une seule fois.
+La solution apportée était d'utiliser une variable globale dans le Bison qui est initialisée à chaque fois qu'on trouve une fonction.
+Après, la sémantique peut vérifier la validité des variables utilisées dans le code, en lui passant en paramètres les variables locales si on était dans une fonction.
+
+
 \newpage
 \section{Compilateur Pseudo Pascal}
 
