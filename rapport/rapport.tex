@@ -38,13 +38,13 @@ Ensuite nous verrons comment nous avons écrit l'interpréteur, en essayant de d
 Enfin, nous verrons comment nous avons fait le compilateur, en nous basant sur ce que nous aurons dit précédemment pour l'interpréteur.
 
 \newpage
-\section{Interpreteur Pseudo Pascal}
+\section{Interpréteur Pseudo Pascal}
 
 L'interpréteur du Pseudo-Pascal se compose d'un lexer, d'un parser et d'un analyseur sémantique. A cela nous avons ajouter différentes structures de données pour créer l'interpréteur, comme par exemple un arbre de nodes.
 
-\subsection{Eléments donnés}
+\subsection{Éléments donnés}
 
-Pour ce projet, on nous avait donner un certains nombres d'éléments. Prinsipalement, il nous a été donné la grammaire et la syntaxe du langage pseudo-pascal, ainsi que ces spécificité.
+Pour ce projet, on nous avait donner un certains nombres d'éléments. Principalement, il nous a été donné la grammaire et la syntaxe du langage pseudo-pascal, ainsi que ces spécificité.
 
 \subsubsection{Structure du code Pseudo-Pascal}
 
@@ -79,7 +79,7 @@ Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opé
 
 
 
-\subsection{Eléments programmés}
+\subsection{Éléments programmés}
 
 
 
@@ -119,7 +119,7 @@ Donne en C3A
 
 Une fois ce constat fait, il a juste fallut se dire que les opération compliquées (comme v := (2+7) * 7) peuvent être divisées en des opérations plus simple (v := 2+7; v := v*7).
 
-Ainsi, pour reprendre les exemples entre parentheses, le code :
+Ainsi, pour reprendre les exemples entre parenthèses, le code :
 
 \begin{lstlisting}
     Var v : integer
@@ -145,7 +145,7 @@ Nous avons donc la plupart des expressions qui se traduise simplement, ou qui se
 
 Dans le cas des instruction if ... then ... else, il faut d'abord traduire l'expression conditionnelle en plusieurs expression simples, telles qu'a la fin on puisse soit vérifier une égalité, soit si une variable est plus petite qu'une autre.
 Cette valeur sera l'opposé de la condition du if, car dans le cas ou elle est validée, on saute au jump. Ensuite on effectue un Jz (jump if zero) si l'expression est validée.
-Sinon, a la fin du bloc du if, on fait un Jp (jump) vers l'instruciton suivant la fin du block du else.
+Sinon, a la fin du bloc du if, on fait un Jp (jump) vers l’instruction suivant la fin du bloc du else.
 
 Donc, dans le cas d'une instruction Pseudo-Pascal telle que :
 \begin{lstlisting}
@@ -173,7 +173,7 @@ Dans ce cas, les expressions qui sont exécutées dans le corps du if ou du else
 
 \bigbreak
 
-Pour traduire le while, la méthode est similaire. Il suffit d'éxécuter le code, puis de vérifier si la condition est vérifiée. Si oui on continue, si non on saute au début de la boucle. Ce qui pour le code Pseudo-Pascal suivant :
+Pour traduire le while, la méthode est similaire. Il suffit d’exécuter le code, puis de vérifier si la condition est vérifiée. Si oui on continue, si non on saute au début de la boucle. Ce qui pour le code Pseudo-Pascal suivant :
 
 \begin{lstlisting}
     Var v : integer
@@ -200,18 +200,18 @@ On a donc le corps du while à l'étiquette 3, puis la vérification de la condi
 
 
 \newpage
-\section{Interpreteur Code à 3 Adresses}
+\section{Interpréteur Code à 3 Adresses}
 
-L'interpréteur du code à trois adresses se compose principalement d'un lexer. Etant donné que le code à trois adresses ne possède pas de grammaire au même titre que le langage Pseudo-Pascal,
-dû au fait qu'on ne puisse exécuter qu'une seule action élémentaire par ligne de code (il est impossible d'avoir une expression (X + Y)*2 sur une même ligne), il ne nécissite donc pas l'implémentation d'un parser associé.
+L'interpréteur du code à trois adresses se compose principalement d'un lexer. Étant donné que le code à trois adresses ne possède pas de grammaire au même titre que le langage Pseudo-Pascal,
+dû au fait qu'on ne puisse exécuter qu'une seule action élémentaire par ligne de code (il est impossible d'avoir une expression (X + Y)*2 sur une même ligne), il ne nécessite donc pas l'implémentation d'un parser associé.
 
 A ce lexer vient s'ajouter des fichiers complémentaires. Le fichier environ.c permet de créer les environnements dans lesquels vont être exécuter les différentes instruction qu'on aura au préalable écrite. Ce sont ces environnement qui vont donner les valeurs des variables en fin d'exécution.
 On utilise aussi le fichier bilquad.c permettant de créer des bi-listes de quadruplets.
 
-Les environnements, quadruplets et bi-listes de quadruplets seront définits plus loins. Nous allons commencer par voir la structure du code à trois adresses.
+Les environnements, quadruplets et bi-listes de quadruplets seront définis plus loin. Nous allons commencer par voir la structure du code à trois adresses.
 
 
-\subsection{Eléments donnés}
+\subsection{Éléments donnés}
 Nous allons d'abord passer en revue les éléments qui nous ont été donnés pour pouvoir faire ce projet. Ces éléments sont les bi-listes de quadruplets, les quadruplets, les environnements et la structure du code.
 \subsubsection{Structure du code à trois adresses}
 
@@ -221,14 +221,14 @@ Le code à trois adresses se compose de cinq éléments :
 \item Un opérateur
 \item Un premier argument
 \item Un second argument
-\item La destination de l'operation
+\item La destination de l’opération
 \end{itemize}
 
 Il est à noter que tous les éléments ne sont pas toujours nécessaires pour toutes les opérations possibles.
 \medbreak
-L'étiquette désigne grossièrement l'emplacement de l'instruction dans le programme. Elle permettent de pouvoir revenir à une instruction déjà effectuée (dans le cas d'une boucle) ou d'en sauter un certain certaines (apres une condition par exemple). Il a la forme ETx, où x désigne un nombre (par exemple ET12).
+L'étiquette désigne grossièrement l'emplacement de l'instruction dans le programme. Elle permettent de pouvoir revenir à une instruction déjà effectuée (dans le cas d'une boucle) ou d'en sauter un certain certaines (après une condition par exemple). Il a la forme ETx, où x désigne un nombre (par exemple ET12).
 
-Les arguments et la déstination pointe soit sur des variables, soit sur des étiquettes, soit des numéraux. Pour une addition par exemple, on ajoutera la valeur de la variable du premier et du second argument, et on stockera le résultat dans la destination.
+Les arguments et la destination pointe soit sur des variables, soit sur des étiquettes, soit des numéraux. Pour une addition par exemple, on ajoutera la valeur de la variable du premier et du second argument, et on stockera le résultat dans la destination.
 
 L'opérateur indique quelle opération va être effectué. Les différents opérateurs sont (dans le tableau, code à trois adresses est désigné par l'acronyme C3A):
 
@@ -248,11 +248,11 @@ L'opérateur indique quelle opération va être effectué. Les différents opér
   Afc & Affecte & Affecte au second argument la valeur du premier, qui est un numéral\\  \hline
   AfInd & Affecte à l'indice & Affecte à Arg1[Arg2] la valeur de destination\\  \hline
   Ind & Indice & Affecte à la destination la valeur de Arg1[Arg2]\\  \hline
-  Jp & Jump & Fait un saut à l'instruction dont l'etiquette est destination\\  \hline
-  Jz & Jump if Zero & Fait un saut à l'instruction dont l'etiquette est destination si la valeur du premier argument vaut 0\\  \hline
+  Jp & Jump & Fait un saut à l'instruction dont l’étiquette est destination\\  \hline
+  Jz & Jump if Zero & Fait un saut à l'instruction dont l’étiquette est destination si la valeur du premier argument vaut 0\\  \hline
   Call & Call & Appelle la fonction se trouvant à l'étiquette destination\\  \hline
   Ret & Return & Retourne à l'instruction suivant le dernier call effectué\\  \hline
-  Param & Paramettre & Ajoute un paramettre pour le prochain appel de fonction, ayant comme nom le premier argument et comme valeur celle du second\\  \hline
+  Param & Paramettre & Ajoute un paramètre pour le prochain appel de fonction, ayant comme nom le premier argument et comme valeur celle du second\\  \hline
   Sk & Skip & Ne modifie pas l'environnement, passe directement à l'instruction suivante\\  \hline
   St & Stop & Termine l'exécution du programme\\  \hline
 \end{tabular}
@@ -311,8 +311,8 @@ Le quadruplet SUIV permet de construire la simple-liste de quadruplets.
 
 \subsubsection{Les environnements}
 
-Les environnements sont ce qui rend l'interpreteur utilisable. Ils permettent de stocker les variables et leur valeur.
-En fin d'éxécution de l'interpréteur, on voit s'afficher le résultat de l'éxécution, avec la valeur de chaque variables.
+Les environnements sont ce qui rend l’interpréteur utilisable. Ils permettent de stocker les variables et leur valeur.
+En fin d’exécution de l'interpréteur, on voit s'afficher le résultat de l’exécution, avec la valeur de chaque variables.
 
 Un environnement est une liste de couples. Une cellule environnement est donc définie par le triplet suivant :
 
@@ -341,16 +341,16 @@ On obtient le résultat d'environnement suivant :
 \end{lstlisting}
 
 
-\subsection{Eléments programmés}
+\subsection{Éléments programmés}
 
 Nous allons voir dans cette partie, de quelle manières nous avons choisit de programmer les différentes instructions de l'interpréteur.
 
 Il est a noté que pour ce faire, notre lexer, en fin d'exécution, "déroule" la biliste de quadruplet.
 \subsubsection{Opérations arithmétiques, logiques et comparatifs}
-Nous avons dans un premier temps traité les opération "simple", en commencant par les opérations arithmétiques et logiques.
-Pour ce faire nous avons récupérer les valeurs des variables depuit l'environnement, puis nous avons effectué l'opération en question sur ces deux variables et l'avons stocké dans la variable destination.
+Nous avons dans un premier temps traité les opération "simple", en commençant par les opérations arithmétiques et logiques.
+Pour ce faire nous avons récupérer les valeurs des variables depuis l'environnement, puis nous avons effectué l'opération en question sur ces deux variables et l'avons stocké dans la variable destination.
 
-Voici un exemple pour les oppérations à deux arguments :
+Voici un exemple pour les opérations à deux arguments :
 
 \begin{lstlisting}
     if(q->OP == Pl || q->OP == Mu || q->OP == Mo
@@ -365,11 +365,11 @@ Voici un exemple pour les oppérations à deux arguments :
     }
 \end{lstlisting}
 
-Ici, dans q->OP se trouve l'opérateur, comme on l'a vu précédemment. Si l'opérateur est un correspond à une opération arithùétique ou logique, on affecte à la variable destination (q->RES) la valeur du résultat de l'opération (qui est effectué dans la fonction eval).
+Ici, dans q->OP se trouve l'opérateur, comme on l'a vu précédemment. Si l'opérateur est un correspond à une opération arithmétique ou logique, on affecte à la variable destination (q->RES) la valeur du résultat de l'opération (qui est effectué dans la fonction eval).
 \medbreak
 Dans le cas de l'opérateur Not, on cherche juste la valeur de la variable passée en ARG1, puis on effectue l'opération du not en C et stockons le résultat dans la variable destination.
 \medbreak
-L'operateur Lt (lower than), quand à lui, doit comparer deux valeurs. Il suffit donc de récupérer les valeurs des deux arguments et d'effectuer la comparaison :
+L’opérateur Lt (lower than), quand à lui, doit comparer deux valeurs. Il suffit donc de récupérer les valeurs des deux arguments et d'effectuer la comparaison :
 
 \begin{lstlisting}
     if(q->OP == Pl || q->OP == Mu || q->OP == Mo
@@ -387,7 +387,7 @@ L'operateur Lt (lower than), quand à lui, doit comparer deux valeurs. Il suffit
 
 \subsubsection{Opération de sauts, de non changement d'environnement et de fin de programme}
 
-Les opération de jump sont programmés de manière a ce que, dans le cas on doit faire un saut, le quadruplet que nous allons lire a la prochaine itération de la boucle, sera non pas le suivant du quadruplet actuel, mais celui dont l'étiquette est désigné par la destinantion.
+Les opération de jump sont programmés de manière a ce que, dans le cas on doit faire un saut, le quadruplet que nous allons lire a la prochaine itération de la boucle, sera non pas le suivant du quadruplet actuel, mais celui dont l'étiquette est désigné par la destination.
 \medbreak
 L'opération skip qui n'a aucun effet sur l'environnement, a tout simplement était laissé vide. On ne fait aucune opération, on se contente juste de passer à l'instruction suivante.
 \medbreak
@@ -395,11 +395,11 @@ L'opération stop effectue un "return 0" dans le programme C, permettant de dire
 
 \subsubsection{Opérateurs pour les fonctions}
 
-Pour implémenter les appels de focntions en code à trois adresses, il a été nécessaire de créer une pile d'appel.
-Pour ce faire, nous avons céer un tableau d'environnements appelé stack. Stack[0] est l'environnement dans lequel nous n'avons pas encore appelé de fonctions.
-Toutes les cases du tableau sont initialiser à NULL pour éviter des problèmes d'erreurs de segmentation.
+Pour implémenter les appels de fonctions en code à trois adresses, il a été nécessaire de créer une pile d'appel.
+Pour ce faire, nous avons créé un tableau d'environnements appelé stack. Stack[0] est l'environnement dans lequel nous n'avons pas encore appelé de fonctions.
+Toutes les cases du tableau sont initialisées à NULL pour éviter des problèmes d'erreurs de segmentation.
 
-De plus nous avons ajouter une variable servant de pointeur de pile, pour savoir à quel endroit nous en somme. Ce pointeur s'appelle stackLayer (ce nom est arbitraire).
+De plus nous avons ajouté une variable servant de pointeur de pile, pour savoir à quel endroit nous en somme. Ce pointeur s'appelle stackLayer (ce nom est arbitraire).
 \bigbreak
 L'opérateur param fait en sorte d'ajouter dans le stack[stackLayer + 1] la variable de nom ARG1 et de valeur ARG2. Il a le même fonctionnement qu'un opérateur d'affectation, seulement il ne le fait pas dans le même environnement.
 \medbreak
@@ -414,17 +414,17 @@ Sinon, le programme repart vers l'état qu'il avait avant le dernier call, en mo
 
 \subsubsection{Opérateurs d'affectation}
 
-Les opérateurs d'affectations on tous plus ou moins le même fonctionnenemt. En effet, que ce soit à partir de la valeur d'une variable ou d'un numéral, la seule chose qui change est la fonction qu'on utilise pour récuperer la valeur a affecté (valch() dans le cas d'une valeur de variable et atoi dans le cas d'un numéral).
+Les opérateurs d'affectations on tous plus ou moins le même fonctionnement. En effet, que ce soit à partir de la valeur d'une variable ou d'un numéral, la seule chose qui change est la fonction qu'on utilise pour récupérer la valeur a affecté (valch() dans le cas d'une valeur de variable et atoi dans le cas d'un numéral).
 Cependant, une chose qui est importante de noter est la manière que nous avons utiliser pour traiter les tableaux.
 \medbreak
 Nous ne savions pas exactement comment traiter le cas de l'affectation depuis ou vers une case d'un tableau.
 Pour ce faire, nous avons raisonner de la manière suivante : les tableaux fonctionne comme les variables classiques, ils ont cependant une notation légèrement différente.
 
-Nous avons donc décider d'utiliser le système de notation existant. Pour insérer une valeur dans la variable X1[3], nous avons simpement creer une variable se nommant exactement "X1[3]".
-Du fait que les vriables ne peuvent être composées que de lettres et de nombres, il est impossibles pour l'utilisateur d'en créer une ayant cette forme.
+Nous avons donc décider d'utiliser le système de notation existant. Pour insérer une valeur dans la variable X1[3], nous avons simplement créé une variable se nommant exactement "X1[3]".
+Du fait que les variables ne peuvent être composées que de lettres et de nombres, il est impossibles pour l'utilisateur d'en créer une ayant cette forme.
 Ainsi, quand on utilise l'instruction AfInd, on concatène ARG1, '[', ARG2 et ']' pour créer ladite case du tableau.
 
-Si ARG2 est une variable, alors on utilise la valeur de ARG2, si c'est un numéral, on utilise le numéral tel quel, sinon on renvoit une erreur.
+Si ARG2 est une variable, alors on utilise la valeur de ARG2, si c'est un numéral, on utilise le numéral tel quel, sinon on renvoie une erreur.
 Il ne reste plus qu'a assigner à cette variable la valeur souhaitée, qui se trouve dans la destination.
 
 De la même manière, nous récupérons ARG1[ARG2]

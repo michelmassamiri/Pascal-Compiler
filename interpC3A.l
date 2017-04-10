@@ -173,11 +173,11 @@ int main(int ac, char **av)
             {
                 if (rech(q->ARG1, environnement) == NULL)
                     initenv(&environnement, q->ARG1);
-                affect(environnement, q->ARG1, valch(environnement,stack[0], q->ARG2));
+                affect(environnement, q->ARG1, valch(environnement, stack[0], q->ARG2));
             }
             else
             {
-                affect(stack[0], q->ARG1, valch(environnement,stack[0], q->ARG2));
+                affect(stack[0], q->ARG1, valch(environnement, stack[0], q->ARG2));
             }
         }
         else if (q->OP == Afc)
@@ -235,7 +235,7 @@ int main(int ac, char **av)
             strcat(varName, q->ARG1);
             strcat(varName, "[");
 
-            if (rech(q->ARG2, environnement) != NULL || rech(q->ARG2,stack[0]) != NULL)
+            if (rech(q->ARG2, environnement) != NULL || rech(q->ARG2, stack[0]) != NULL)
             {
                 int index = valch(environnement, stack[0], q->ARG2);
                 char *arg2 = malloc((floor(log10(abs(index))) + 1) * sizeof(char));
