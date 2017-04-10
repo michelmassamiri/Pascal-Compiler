@@ -53,7 +53,7 @@ typedef struct nodeTypeTag {
         oprNodeType opr;        /* operators */
     };
 
-    type o_type ;               /* type of the non-terminal or terminal like : integer, boolean, ... */
+    type* o_type ;               /* type of the non-terminal or terminal like : integer, boolean, ... */
 } nodeType;
 
 /* listefonctions := liste de 4-tuples (ident, BILparametres, BILvarloc, ast) */
@@ -107,9 +107,14 @@ extern ENTFON EntFonalloc(); /* retourne une en-tete de fonction */
 nodeType* con(int value, type type_con);
 nodeType* id(char* v, type type_id);
 nodeType* opr(int oper, int nops, ...);
-
+nodeType* copy_id(nodeType* n);
+nodeType* copy_con(nodeType* n);
+nodeType* copy_opr(nodeType* n);
 /*---------------------environnements--------------------------------------------*/
 extern int  type_eq(type t1, type t2);/* 1 si t1 ==t2 , 0 sinon                  */
+extern type get_type(type* t1);
+extern int get_type_dim(type* t1);
+extern int get_type_typef(type* t1);
 extern void type_copy(type *tcop, type torig);/* copie torig vers tcop           */
 extern void type_affect(ENVTY rho, type tvar);/* affecte le type  de   *rho      */
 extern type creer_type(int dm, int tf);/* retourne le type                       */
@@ -138,5 +143,4 @@ void ecrire_prog(BILENVTY argby,BILFON bilfon,nodeType* argno);             /* a
 #define TAILLEADR 1000       /* nbe max adresses dans le tas                     */
 #define TAILLEMEM 10000      /* taille du tas
 /*---------------------VARIABLES globales ---------------------------------------*/
-//extern NOE syntree;          /* arbre syntaxique  (y.tab.c)                      */
 #endif

@@ -3,7 +3,7 @@ YACC = bison
 LEX = flex
 CFLAGS:= -std=gnu99 -g
 LDFLAGS:= -lm
-PROGS = compilerIMP compilerC3A interpC3A interpIMP interpPP
+PROGS = compilerC3A interpC3A interpPP
 
 .PHONY : clean
 
@@ -42,8 +42,6 @@ iimp : compilerIMP compilerC3A iimp.c
 
 #interpreter pour le pseudo pascal
 
-#ppascal.tab.c ppascal.tab.h : ppascal.y
-			#$(YACC) -t -v -d $<
 
 ppascal.yy.c : ppascal.l ppascal.tab.h
 						$(LEX) -o $@ $<
