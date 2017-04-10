@@ -48,13 +48,14 @@ iimp : compilerIMP compilerC3A iimp.c
 ppascal.yy.c : ppascal.l ppascal.tab.h
 						$(LEX) -o $@ $<
 
-ppascal.tab.c ppascal.tab.h : ppascal.y arbre.h anasem.h
+ppascal.tab.c ppascal.tab.h : ppascal.y arbre.h anasem.h interp.h
 						$(YACC) -t -v -d $<
 
 arbre.o : arbre.c arbre.h ppascal.tab.h
 anasem.o : anasem.c anasem.h ppascal.tab.h
+interp.o : interp.c interp.h ppascal.tab.h
 
-interpPP : ppascal.tab.o ppascal.yy.o arbre.o anasem.o
+interpPP : ppascal.tab.o ppascal.yy.o arbre.o anasem.o interp.o
 			$(CC) $(CFLAGS) -o $@ $^
 
 rapport : rapport/rapport.tex
