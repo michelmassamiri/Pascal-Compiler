@@ -375,14 +375,22 @@ int ecrire_envty(ENVTY rho)
 
 /* valeur de var dans rho  (UTILISEE ??)                     */
 /* NB: la valeur d'un tableau est un index du tas            */
-int valchty(ENVTY rho, char *var)
+int valchty(ENVTY rho, ENVTY pg, char *var)
 {
   ENVTY pos;
-  pos=rechty(var,rho);/* adresse de la cellule contenant var */
+  pos = rech(var, pg);
   if (pos != NULL)
-    return(pos->VAL);
+  {
+    return (pos->VAL);
+  }
   else
-    return(0);
+  {
+    pos = rech(var, rho); /* adresse de la cellule contenant var */
+    if (pos != NULL)
+      return (pos->VAL);
+    else
+      return (0);
+  }
 }
 
 /* initialise var dans *prho */

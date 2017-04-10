@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "ppascal.tab.h"
-#include "environ.h"
+#include "arbre.h"
 
 static int currentC = 0, current = 0;
 
@@ -10,7 +10,7 @@ void print(int etq, const char *op, const char *arg, const char *buf2, const cha
 }
 static int lbJMP = 0;
 
-int ex_bis(ENV *e, nodeType *p)
+int ex_bis(ENVTY *e, nodeType *p)
 {
     int lbJMP1, lbJMP2, leftCurrent = 0;
     char buf1[20];
@@ -24,8 +24,8 @@ int ex_bis(ENV *e, nodeType *p)
     case typeCon:
     case Afc:
         ex_bis(e, p->opr.op[0]);
-        snprintf(buf1f, 20, "%d", p->con.value);
-        snprintf(buf1f2, 20, "CT%d", p->opr.op[0]->id.v);
+        snprintf(buf1, 20, "%d", p->con.value);
+        snprintf(buf2, 20, "CT%d", p->opr.op[0]->id.v);
         print(current++, "Afc", buf1, NULL, buf1f2);
         break;
     case typeId:
@@ -191,7 +191,7 @@ int ex_bis(ENV *e, nodeType *p)
     return 0;
 }
 
-int ex(ENV *e, nodeType *p)
+int ex(ENVTY *e, nodeType *p)
 {
     int res = ex_bis(e, p);
     print(current++, "St", NULL, NULL, NULL);
