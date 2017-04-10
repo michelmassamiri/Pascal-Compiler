@@ -118,10 +118,33 @@ int ex_bis(ENV *e, nodeType *p)
             break;
 
         case Param:
-            break;
-        case Call:
+            ex_bis(e, p->opr.op[0]);
+            leftCurrent = currentC;
+            ex_bis(e, p->opr.op[1]);
+            snprintf(buf1, 20, "CT%d", leftCurrent);
+            snprintf(buf2, 20, "CT%d", currentC);
+            print(current++, "Param", buf1, buf2, NULL);
             break;
 
+
+        case Call:
+            ex_bis(e, p->opr.op[0]);
+            leftCurrent = currentC;
+            ex_bis(e, p->opr.op[1]);
+            snprintf(buf1, 20, "CT%d", leftCurrent);
+            snprintf(buf2, 20, "CT%d", currentC);
+            print(current++, "Call", buf1, buf2,NULL);
+            break;
+
+        case Ret:
+            ex_bis(e, p->opr.op[0]);
+            leftCurrent = currentC;
+            ex_bis(e, p->opr.op[1]);
+            snprintf(buf1, 20, "CT%d", leftCurrent);
+            snprintf(buf2, 20, "CT%d", currentC);
+            print(current++, "Ret", buf1, buf2, NULL);
+            break;
+            
         case Pl:
             ex_bis(e, p->opr.op[0]);
             leftCurrent = currentC;

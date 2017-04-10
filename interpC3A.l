@@ -117,21 +117,20 @@ BILQUAD bq;
 
 [ \t] {}
 . {printf("\n An error as been thrown\n"); BEGIN(INITIAL);}
-
 %%
 
-int isNumber(char * chaine)
+int isNumber(char *chaine)
 {
     int l = strlen(chaine);
-    for(int i = 0; i < l; ++i)
+    for (int i = 0; i < l; ++i)
     {
-        if(!isdigit(chaine[i]))
+        if (!isdigit(chaine[i]))
             return 0;
     }
     return 1;
 }
 
-int main(int ac, char** av)
+int main(int ac, char **av)
 {
     etiquette = malloc(sizeof(char));
     dest = malloc(sizeof(char));
@@ -141,7 +140,7 @@ int main(int ac, char** av)
     yylex();
 
     ENV stack[STACKSIZE];
-    for(int i = 0; i < STACKSIZE; ++i)
+    for (int i = 0; i < STACKSIZE; ++i)
     {
         stack[i] = NULL;
     }
@@ -151,117 +150,171 @@ int main(int ac, char** av)
 
     int stackLayer = 0; //taille actuelle de la pile d'appel
 
-    while(q != NULL)
+    while (q != NULL)
     {
-        if(q->OP == Jp)
+        if (q->OP == Jp)
         {
             q = rechbq(q->RES, bq);
             continue;
         }
-        else if(q->OP == St)
+        else if (q->OP == St)
             break;
-        else if(q->OP == Jz)
+        else if (q->OP == Jz)
         {
-            if(valch(environnement, q->ARG1) == 0)
+            if (valch(environnement, stack[0], q->ARG1) == 0)
             {
                 q = rechbq(q->RES, bq);
                 continue;
             }
         }
-        else if(q->OP == Af)
+        else if (q->OP == Af)
         {
-            if(rech(q->ARG1, environnement) == NULL)
-                initenv(&environnement, q->ARG1);
-            affect(environnement, q->ARG1, valch(environnement, q->ARG2));
-        }
-        else if(q->OP == Afc)
-        {
-            if(rech(q->RES, environnement) == NULL)
-                initenv(&environnement, q->RES);
-            affect(environnement, q->RES, atoi(q->ARG1));
-        }
-        else if(q->OP == Pl || q->OP == Mu || q->OP == Mo || q->OP == And || q->OP == Or)
-        {
-            if(rech(q->RES, environnement) == NULL)
-                initenv(&environnement, q->RES);
-            affect(environnement, q->RES, eval(q->OP, valch(environnement, q->ARG1), valch(environnement, q->ARG2)));
-        }
-        else if(q->OP == Sk) {;}
-        else if(q->OP == Lt)
-        {
-            if(rech(q->RES, environnement) == NULL)
-                initenv(&environnement, q->RES);
-            if(valch(environnement, q->ARG1) < valch(environnement, q->ARG2))
-                affect(environnement, q->RES, 1);
+            if (rech(q->ARG1, stack[0]) == NULL)
+            {
+                if (rech(q->ARG1, environnement) == NULL)
+                    initenv(&environnement, q->ARG1);
+                affect(environnement, q->ARG1, valch(environnement, stack[0], q->ARG2));
+            }
             else
-                affect(environnement, q->RES, 0);
+            {
+                affect(stack[0], q->ARG1, valch(environnement, stack[0], q->ARG2));
+            }
         }
-        else if(q->OP == Ind)
+        else if (q->OP == Afc)
         {
-            char * varName = malloc((2+strlen(q->ARG1)+strlen(q->ARG2))*sizeof(char));
+            if (rech(q->RES, stack[0]) == NULL)
+            {
+                if (rech(q->RES, environnement) == NULL)
+                    initenv(&environnement, q->RES);
+                affect(environnement, q->RES, atoi(q->ARG1));
+            }
+            else
+            {
+                affect(stack[0], q->RES, atoi(q->ARG1));
+            }
+        }
+        else if (q->OP == Pl || q->OP == Mu || q->OP == Mo || q->OP == And || q->OP == Or)
+        {
+            if (rech(q->RES, stack[0]) == NULL)
+            {
+                if (rech(q->RES, environnement) == NULL)
+                    initenv(&environnement, q->RES);
+                affect(environnement, q->RES, eval(q->OP, valch(environnement, stack[0], q->ARG1), valch(environnement, stack[0], q->ARG2)));
+            }
+            else
+            {
+                affect(environnement, q->RES, eval(q->OP, valch(environnement, stack[0], q->ARG1), valch(environnement, stack[0], q->ARG2)));
+            }
+        }
+        else if (q->OP == Sk)
+        {
+            ;
+        }
+        else if (q->OP == Lt)
+        {
+            if (rech(q->RES, stack[0]) == NULL)
+            {
+                if (rech(q->RES, environnement) == NULL)
+                    initenv(&environnement, q->RES);
+                if (valch(environnement, stack[0], q->ARG1) < valch(environnement, stack[0], q->ARG2))
+                    affect(environnement, q->RES, 1);
+                else
+                    affect(environnement, q->RES, 0);
+            }
+            else
+            {
+                if (valch(environnement, stack[0], q->ARG1) < valch(environnement, stack[0], q->ARG2))
+                    affect(stack[0], q->RES, 1);
+                else
+                    affect(stack[0], q->RES, 0);
+            }
+        }
+        else if (q->OP == Ind)
+        {
+            char *varName = malloc((2 + strlen(q->ARG1) + strlen(q->ARG2)) * sizeof(char));
             strcat(varName, q->ARG1);
             strcat(varName, "[");
-            if(rech(q->ARG2, environnement) != NULL)
+
+            if (rech(q->ARG2, environnement) != NULL || rech(q->ARG2, stack[0]) != NULL)
             {
-                int index = valch(environnement, q->ARG2);
-                char *arg2 = malloc((floor(log10(abs(index)))+1)*sizeof(char));
+                int index = valch(environnement, stack[0], q->ARG2);
+                char *arg2 = malloc((floor(log10(abs(index))) + 1) * sizeof(char));
                 sprintf(arg2, "%d", index);
                 strcat(varName, arg2);
             }
-            else if(isNumber(q->ARG2))
+            else if (isNumber(q->ARG2))
                 strcat(varName, q->ARG2);
             else
             {
-                fprintf(stderr,"Variable %s does not exist\n", q->ARG2);
+                fprintf(stderr, "Variable %s does not exist\n", q->ARG2);
                 return -1;
             }
             strcat(varName, "]");
-
-            if(rech(q->RES, environnement) == NULL)
-                initenv(&environnement, q->RES);
-            affect(environnement, q->RES, valch(environnement, varName));
+            if (rech(q->RES, stack[0]) == NULL)
+            {
+                if (rech(q->RES, environnement) == NULL)
+                    initenv(&environnement, q->RES);
+                affect(environnement, q->RES, valch(environnement, stack[0], varName));
+            }
+            else
+            {
+                affect(stack[0], q->RES, valch(environnement, stack[0], varName));
+            }
         }
-        else if(q->OP == AfInd)
+        else if (q->OP == AfInd)
         {
-            char * varName = malloc((2+strlen(q->ARG1)+strlen(q->ARG2))*sizeof(char));
+            char *varName = malloc((2 + strlen(q->ARG1) + strlen(q->ARG2)) * sizeof(char));
             strcat(varName, q->ARG1);
             strcat(varName, "[");
-            if(rech(q->ARG2, environnement) != NULL)
+            if (rech(q->ARG2, environnement) != NULL || rech(q->ARG2, stack[0]) != NULL)
             {
-                int index = valch(environnement, q->ARG2);
-                char *arg2 = malloc((floor(log10(abs(index)))+1)*sizeof(char));
+                int index = valch(environnement, stack[0], q->ARG2);
+                char *arg2 = malloc((floor(log10(abs(index))) + 1) * sizeof(char));
                 sprintf(arg2, "%d", index);
                 strcat(varName, arg2);
             }
-            else if(isNumber(q->ARG2))
+            else if (isNumber(q->ARG2))
                 strcat(varName, q->ARG2);
             else
             {
-                fprintf(stderr,"Variable %s does not exist\n", q->ARG2);
+                fprintf(stderr, "Variable %s does not exist\n", q->ARG2);
                 return -1;
             }
             strcat(varName, "]");
-
-            if(rech(varName, environnement) == NULL)
-                initenv(&environnement, varName);
-            affect(environnement, varName, valch(environnement, q->RES));
+            if (rech(varName, stack[0]) == NULL)
+            {
+                if (rech(varName, environnement) == NULL)
+                    initenv(&environnement, varName);
+                affect(environnement, varName, valch(environnement, stack[0], q->RES));
+            }
+            else
+            {
+                affect(stack[0], varName, valch(environnement, stack[0], q->RES));
+            }
         }
-        else if(q->OP == Not)
+        else if (q->OP == Not)
         {
-            if(rech(q->RES, environnement) == NULL)
-                initenv(&environnement, q->RES);
-            affect(environnement, q->RES, !valch(environnement, q->ARG1));
+            if (rech(q->RES, stack[0]) == NULL)
+            {
+                if (rech(q->RES, environnement) == NULL)
+                    initenv(&environnement, q->RES);
+                affect(environnement, q->RES, !valch(environnement, stack[0], q->ARG1));
+            }
+            else
+            {
+                affect(stack[0], q->RES, !valch(environnement, stack[0], q->ARG1));
+            }
         }
-        else if(q->OP == Param)
+        else if (q->OP == Param)
         {
-            if(rech(q->ARG1, stack[stackLayer+1]) == NULL)
-                initenv(&stack[stackLayer+1], q->ARG1);
-            affect(stack[stackLayer+1], q->ARG1, atoi(q->ARG2));
+            if (rech(q->ARG1, stack[stackLayer + 1]) == NULL)
+                initenv(&stack[stackLayer + 1], q->ARG1);
+            affect(stack[stackLayer + 1], q->ARG1, atoi(q->ARG2));
         }
-        else if(q->OP == Call)
+        else if (q->OP == Call)
         {
             stackQuad[stackLayer] = q->SUIV;
-            if(++stackLayer >= STACKSIZE)
+            if (++stackLayer >= STACKSIZE)
             {
                 printf("Stack Overflow.\n");
                 return EXIT_FAILURE;
@@ -269,23 +322,22 @@ int main(int ac, char** av)
             environnement = stack[stackLayer];
             q = rechbq(q->ARG1, bq);
         }
-        else if(q->OP == Ret)
+        else if (q->OP == Ret)
         {
-            if(stackLayer == 0)
+            if (stackLayer == 0)
                 return 0;
             environnement = stack[--stackLayer];
             q = stackQuad[stackLayer];
         }
-        else{
+        else
+        {
             printf("error\n");
             return EXIT_FAILURE;
         }
         q = q->SUIV;
     }
 
-
     ecrire_env(environnement);
-
 
     free(etiquette);
     free(dest);
