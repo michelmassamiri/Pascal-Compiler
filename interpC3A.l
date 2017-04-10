@@ -117,7 +117,7 @@ BILQUAD bq;
 
 [ \t] {}
 . {printf("\n An error as been thrown\n"); BEGIN(INITIAL);}
-% %
+%%
 
 int isNumber(char *chaine)
 {
