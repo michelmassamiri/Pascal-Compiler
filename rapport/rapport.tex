@@ -4,6 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[francais]{babel}
 \usepackage{listings}
+\usepackage{comment}
 
 
 \title{Rapport du projet de compilation}
@@ -39,15 +40,17 @@ Enfin, nous verrons comment nous avons fait le compilateur, en nous basant sur c
 \newpage
 \section{Interpreteur Pseudo Pascal}
 
-L'interpréteur du Pseudo-Pascal se compose d'un lexer, d'un parser et d'un analyseur sémantique.
+L'interpréteur du Pseudo-Pascal se compose d'un lexer, d'un parser et d'un analyseur sémantique. A cela nous avons ajouter différentes structures de données pour créer l'interpréteur, comme par exemple un arbre de nodes.
 
 \subsection{Eléments donnés}
 
 Pour ce projet, on nous avait donner un certains nombres d'éléments. Prinsipalement, il nous a été donné la grammaire et la syntaxe du langage pseudo-pascal, ainsi que ces spécificité.
 
+\subsubsection{Structure du code Pseudo-Pascal}
+
 Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opérateurs unaire ou binaire :
 
-\begin{tabular}{|p{2cm}|p{12cm}|}
+\begin{tabular}{|p{2cm}|p{11cm}|}
   \hline
   Opérateur / mot clé PP  & effet de l'opérateur \\
   \hline
@@ -83,7 +86,57 @@ Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opé
 \newpage
 \section{Compilateur Pseudo Pascal}
 
+Pour compiler le code du Pseudo-Pascal vers le Code à 3 adresses\footnote{Pour les informations sur le code à trois adresses (structure, fonctionnement, etc.), voir la section 4.}, nous sommes partit de l'idée suivante : les expressions simples en PP sont facilement traductible vers le C3A :
 
+\begin{lstlisting}
+    Var v : integer
+    v := 1
+\end{lstlisting}
+
+Donne en C3A
+
+\begin{lstlisting}
+    ET0 :Afc :1 : :v
+\end{lstlisting}
+
+Ou encore, pour une addition :
+
+\begin{lstlisting}
+    Var v : integer
+    v := 4 + 2
+\end{lstlisting}
+
+Donne en C3A
+
+\begin{lstlisting}
+    ET0 :Afc :4 : :X1
+    ET1 :Afc :2 : :X2
+    ET2 :Pl :X1 :X2 :v
+\end{lstlisting}
+
+\bigbreak
+
+Une fois ce constat fait, il a juste fallut se dire que les opération compliquées (comme v := (2+7) * 7) peuvent être divisées en des opérations plus simple (v := 2+7; v := v*7).
+
+Ainsi, pour reprendre les exemples entre parentheses, le code :
+
+\begin{lstlisting}
+    Var v : integer
+    v := (2+7) * 7
+\end{lstlisting}
+
+Donne en C3A
+
+\begin{lstlisting}
+    ET0 :Afc :2 : :X1
+    ET1 :Afc :7 : :X2
+    ET2 :Pl :X1 :X2 :v
+    ET3 :Afc :7 : :X3
+    ET4 :Mu :v :X3 :v
+\end{lstlisting}
+
+Il est à noter que nous affectons deux fois la variables 7 à des variables temporaires dans cette traduction. Il est donc possible d'optimiser la compilation, en ne réaffectant pas la valeur 7 à une variable mais en utilisant directement X2, mais par manque de temps et d'expérience, nous n'y sommes pas parvenus.
+\bigbreak
 
 \newpage
 \section{Interpreteur Code à 3 Adresses}
@@ -315,6 +368,39 @@ Il ne reste plus qu'a assigner à cette variable la valeur souhaitée, qui se tr
 
 De la même manière, nous récupérons ARG1[ARG2]
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{comment}
+
+=====================================
+-------------------------------------
+    COMMENTAIRE
+-------------------------------------
+=====================================
+
 \newpage
 \section{Compilateur Code à 3 Adresses}
 
@@ -356,8 +442,7 @@ Une partie de cette conversion a été assez simple, dû au fait qu'il existe de
 Comme nous pouvons le voir, sur les 18 insructions du code à trois adresses, 11 sont traduisible immédiatement ou presque. A celles-ci on peut ajouter le Mu, qui a été donner dans les exemples de code du projet.
 
 \subsection{Traductions longues}
-
-
+\end{comment}
 
 
 \end{document}
