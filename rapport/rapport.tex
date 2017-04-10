@@ -30,6 +30,11 @@ En effet il ne comportes que deux types de variables, les entiers et les boolée
 Dans un second temps nous avons du créer un interpréteur d'un langage à trois adresses, qui sert de langage intermédiaire entre le Pseudo-Pascal et le langage assembleur de la machine.
 
 Enfin il était demande de créer un compilateur (traducteur) du langage Pseudo-Pascal vers le code à trois adresses.
+\bigbreak
+L'organisation du rapport est symétrique : dans une première partie sur un langage, nous discuterons de l'interpréteur, en décrivant au préalable ce qui nous a été donné pour faire ce travail.
+Ensuite nous verrons comment nous avons écrit l'interpréteur, en essayant de détaillé un maximum ce qui est utile de détaillé.
+
+Enfin, nous verrons comment nous avons fait le compilateur, en nous basant sur ce que nous aurons dit précédemment pour l'interpréteur.
 
 \newpage
 \section{Interpreteur Pseudo Pascal}
@@ -49,6 +54,10 @@ Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opé
   \hline
 
 \end{tabular}
+
+
+\subsection{Eléments programmés}
+
 
 
 \newpage
@@ -297,7 +306,9 @@ L'écriture du code Y86 se fait sur la sortie standard, via la fonction C "print
 
 Le fait que l'écriture se fasse sur la sortie standard permet de tester plus simplement le programme sur des petits exemples.
 
-\subsection{Traduction directe et quasi directe}
+
+\subsection{Traduction directe et quasi-directe}
+
 
 Une partie de cette conversion a été assez simple, dû au fait qu'il existe des correspondances dirrecte (ou en 2 instruction, en ajoutant mrmovl dans certains cas) pour certaines instruction :
 
@@ -313,8 +324,8 @@ Une partie de cette conversion a été assez simple, dû au fait qu'il existe de
         Sk & nop\\ \hline
         Pl & addl \\ \hline
         Mo & subl \\ \hline
-        Or & orl \\ \hline
         And & andl \\ \hline
+        Or & orl \\ \hline
         Call & call \\ \hline
         Ret & ret \\ \hline
         Param & pushl \\ \hline
@@ -322,7 +333,10 @@ Une partie de cette conversion a été assez simple, dû au fait qu'il existe de
 \end{center}
 
 
-Comme nous pouvons le voir, sur les 18 insructions du code à trois adresses, 11 sont traduisible immédiatement ou presque. A celles ci on peut ajouter le Mu, qui a été donner dans les exemples de code du projet.
+Comme nous pouvons le voir, sur les 18 insructions du code à trois adresses, 11 sont traduisible immédiatement ou presque. A celles-ci on peut ajouter le Mu, qui a été donner dans les exemples de code du projet.
+
+\subsection{Traductions longues}
+
 
 
 
