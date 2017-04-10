@@ -26,7 +26,7 @@ Le présent projet de compilation a été effectué dans le cadre de l'Unité d'
 \medbreak
 
 Le but de ce projet est de créer un interpréteur d'un langage similaire au langage Pascal. Il s'agit cependant d'une version simplifiée de ce langage qui se nomme Pseudo-Pascal.
-En effet il ne comportes que deux types de variables, les entiers et les booléens, et des tableaux dynamiques de ces deux types.
+En effet il ne comporte que deux types de variables, les entiers et les booléens, et des tableaux dynamiques de ces deux types.
 
 Dans un second temps il fallait créer un interpréteur d'un langage à trois adresses, qui sert de langage intermédiaire entre le Pseudo-Pascal et le langage assembleur de la machine.
 
@@ -83,9 +83,9 @@ Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opé
 
 \subsection{Éléments programmés}
 
-Pour pouvoir créer un interpreteur du langage Pseudo-Pascal, nous avons du commencer par faire reconnaitre les différents mots clés par un lexer. Celui ci s'occupe juste de renvoyer le code correspondant au mot clé que nous venons de lire, il sera par la suite traité par le parser.
+Pour pouvoir créer un interpréteur du langage Pseudo-Pascal, nous avons dû commencer par faire reconnaître les différents mots clés par un lexer. Celui-ci s'occupe juste de renvoyer le code correspondant au mot clé que nous venons de lire, il sera par la suite traité par le parser.
 
-Quelques exemples d'opérations reconnus ainsi que leur code de retour:
+Quelques exemples d'opérations reconnus ainsi que leur code de retour :
 \begin{lstlisting}
     "+" { return Pl; }
     "-" { return Mo; }
@@ -96,30 +96,30 @@ Quelques exemples d'opérations reconnus ainsi que leur code de retour:
     "skip" { return Sk; }
 \end{lstlisting}
 
-Autres exemples de mots clés reconnus ainsi que leur code de retour:
+Autres exemples de mots clés reconnus ainsi que leur code de retour :
 \begin{lstlisting}
 "skip" { return Sk; }
-    "boolean" { return T_boo; } : reconnait le mot type boolean
-    "integer" { return T_int; } : reconnait le mot type integer
-    "new array of" { return NewAr; } : reconnait l'initialisation d'un tableau
-    "defun" { BEGIN(FONC); return Def;} : reconnait la declaration d'une fonction
+    "boolean" { return T_boo; } : reconnaît le mot type boolean
+    "integer" { return T_int; } : reconnaît le mot type integer
+    "new array of" { return NewAr; } : reconnaît l'initialisation d'un tableau
+    "defun" { BEGIN(FONC); return Def;} : reconnaît la déclaration d'une fonction
 \end{lstlisting}
 
 Ces codes de retour vont être utilisés par la suite dans le parser.
 
 \smallbreak
 Le rôle du parser est de vérifier si la grammaire du programme est exacte. Ceci se fait via certaines règles (qui nous ont été imposées). De plus il permet de créer l'abre de dérivation du langage. Il n'y a plus qu'à "dérouler" l'arbre pour pourvoir donner les valeurs aux différentes variables et les insérer dans un environnement.
-Le parser définit donc des règles comme par exemple:
+Le parser définit donc des règles comme par exemple :
 
 \begin{lstlisting}
 E     : E Pl T    { $$ = opr(Pl, 2, $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
 \end{lstlisting}
 
-Cette règle va ainsi vérifier si la grammaire est exacte si on lit " X1 + X2 " par exemple et ensuite créée le noeud correspondant à l'opération '+' ainsi que son fils gauche et droit dans l'arbre contenant les expressions. Il est à noter qu'il va également calculer le type.
+Cette règle va ainsi vérifier si la grammaire est exacte si on lit " X1 + X2 " par exemple et ensuite créée le nœud correspondant à l'opération '+' ainsi que son fils gauche et droit dans l'arbre contenant les expressions. Il est à noter qu'il va également calculer le type.
 
 \smallbreak
 Nous avons ensuite mis au point un analyseur lexical (ou sémantique), permettant de vérifier si le type des variables, fonctions, paramètres, arguments, etc., correspondent bien entre eux et sont bien valides.
-Par exemple le code ci-dessous:
+Par exemple le code ci-dessous :
 
 \begin{lstlisting}
 case Pl: case Mo: case Mu:
@@ -140,26 +140,26 @@ case Pl: case Mo: case Mu:
     return(tp);
 \end{lstlisting}
 
-Cela signifie que pour la cas de l'opération 'Plus' 'Moins' ou 'Multiplier', l'analyseur sémantique vérifie que les types des fils gauches et droites (donc les variables utilisées) pour ces opérations sont bien du même type, sinon il retourne une erreur de typage.
+Cela signifie que pour le cas de l'opération 'Plus' 'Moins' ou 'Multiplier', l'analyseur sémantique vérifie que les types des fils gauches et droites (donc les variables utilisées) pour ces opérations sont bien du même type, sinon il retourne une erreur de typage.
 
 \smallbreak
-L'interpreteur est une fonction récursive qui une fois que la grammaire et le typage sont vérifiés va réellement executer le code en fonction des différentes opérations.
+L'interpreteur est une fonction récursive qui une fois que la grammaire et le typage sont vérifiés va réellement exécuter le code en fonction des différentes opérations.
 
-Par exemple dans le cas de l'opération "Plus":
+Par exemple dans le cas de l'opération "Plus" :
 
 \begin{lstlisting}
 case Pl :
           return interpreter_recursive(benvty, bfon, n->opr.op[0]) + interpreter_recursive(benvty, bfon, n->opr.op[1]);
 \end{lstlisting}
 
-Ce code va donc exécuter l'opération avec "+" avec le fils gauche et le fils droit du noeud.
+Ce code va donc exécuter l'opération avec "+" avec le fils gauche et le fils droit du nœud.
 
 
 \bigbreak
 
-Nous avons donc le programme qui est entré par l'utilisateur dans l'interpréteur. L'interpreteur se charge d'abord de vérifier que les mots clés existent individuellement, puis que les expressions existent.
-Si tel est le cas, on donne une valeur à chaque expression, et on vérifie si le typage est correcte.
-Puis le tout est stocké dans des environnements de noeuds, permettant d'avoir le résultat de l'éxécution en fin de programme.
+Nous avons donc le programme qui est entré par l'utilisateur dans l'interpréteur. L’interpréteur se charge d'abord de vérifier que les mots clés existent individuellement, puis que les expressions existent.
+Si tel est le cas, on donne une valeur à chaque expression, et on vérifie si le typage est correct.
+Puis le tout est stocké dans des environnements de nœuds, permettant d'avoir le résultat de l’exécution en fin de programme.
 
 \newpage
 \section{Compilateur Pseudo Pascal}
@@ -221,9 +221,9 @@ Nous avons donc la plupart des expressions qui se traduise simplement, ou qui se
 
 \subsection{Traductions longues}
 
-Dans le cas des instruction if ... then ... else, il faut d'abord traduire l'expression conditionnelle en plusieurs expression simples, telles qu'a la fin on puisse soit vérifier une égalité, soit si une variable est plus petite qu'une autre.
-Cette valeur sera l'opposé de la condition du if, car dans le cas ou elle est validée, on saute au jump. Ensuite on effectue un Jz (jump if zero) si l'expression est validée.
-Sinon, a la fin du bloc du if, on fait un Jp (jump) vers l’instruction suivant la fin du bloc du else.
+Dans le cas des instruction if ... then ... else, il faut d'abord traduire l'expression conditionnelle en plusieurs expression simples, telles qu'à la fin on puisse soit vérifier une égalité, soit si une variable est plus petite qu'une autre.
+Cette valeur sera l'opposé de la condition du if, car dans le cas où elle est validée, on saute au jump. Ensuite on effectue un Jz (jump if zero) si l'expression est validée.
+Sinon, à la fin du bloc du if, on fait un Jp (jump) vers l’instruction suivant la fin du bloc du else.
 
 Donc, dans le cas d'une instruction Pseudo-Pascal telle que :
 \begin{lstlisting}
@@ -251,7 +251,7 @@ Dans ce cas, les expressions qui sont exécutées dans le corps du if ou du else
 
 \bigbreak
 
-Pour traduire le while, la méthode est similaire. Il suffit d’exécuter le code, puis de vérifier si la condition est vérifiée. Si oui on continue, si non on saute au début de la boucle. Ce qui pour le code Pseudo-Pascal suivant :
+Pour traduire le while, la méthode est similaire. Il suffit d’exécuter le code, puis de vérifier si la condition est vérifiée. Si oui on continue, sinon on saute au début de la boucle. Ce qui pour le code Pseudo-Pascal suivant :
 
 \begin{lstlisting}
     Var v : integer
@@ -283,7 +283,7 @@ On a donc le corps du while à l'étiquette 3, puis la vérification de la condi
 L'interpréteur du code à trois adresses se compose principalement d'un lexer. Étant donné que le code à trois adresses ne possède pas de grammaire au même titre que le langage Pseudo-Pascal,
 dû au fait qu'on ne puisse exécuter qu'une seule action élémentaire par ligne de code (il est impossible d'avoir une expression (X + Y)*2 sur une même ligne), il ne nécessite donc pas l'implémentation d'un parser associé.
 
-A ce lexer vient s'ajouter des fichiers complémentaires. Le fichier environ.c permet de créer les environnements dans lesquels vont être exécuter les différentes instruction qu'on aura au préalable écrite. Ce sont ces environnement qui vont donner les valeurs des variables en fin d'exécution.
+A ce lexer vient s'ajouter des fichiers complémentaires. Le fichier environ.c permet de créer les environnements dans lesquels vont être exécuter les différentes instructions qu'on aura au préalable écrites. Ce sont ces environnements qui vont donner les valeurs des variables en fin d'exécution.
 On utilise aussi le fichier bilquad.c permettant de créer des bi-listes de quadruplets.
 
 Les environnements, quadruplets et bi-listes de quadruplets seront définis plus loin. Nous allons commencer par voir la structure du code à trois adresses.
@@ -304,7 +304,7 @@ Le code à trois adresses se compose de cinq éléments :
 
 Il est à noter que tous les éléments ne sont pas toujours nécessaires pour toutes les opérations possibles.
 \medbreak
-L'étiquette désigne grossièrement l'emplacement de l'instruction dans le programme. Elle permettent de pouvoir revenir à une instruction déjà effectuée (dans le cas d'une boucle) ou d'en sauter un certain certaines (après une condition par exemple). Il a la forme ETx, où x désigne un nombre (par exemple ET12).
+L'étiquette désigne grossièrement l'emplacement de l'instruction dans le programme. Elles permettent de pouvoir revenir à une instruction déjà effectuée (dans le cas d'une boucle) ou d'en sauter un certain certaines (après une condition par exemple). Il a la forme ETx, où x désigne un nombre (par exemple ET12).
 
 Les arguments et la destination pointe soit sur des variables, soit sur des étiquettes, soit des numéraux. Pour une addition par exemple, on ajoutera la valeur de la variable du premier et du second argument, et on stockera le résultat dans la destination.
 
@@ -379,9 +379,9 @@ Ces quadruplets servent à stocker les différentes instructions du programme en
 \item Le quadruplet suivant (struct cellquad SUIV)
 \end{itemize}
 
-Les étiquettes correspondes aux étiquettes données dans le code à trois adresses. Elles sont donc de la forme ETn où n est un nombre.
+Les étiquettes correspondent aux étiquettes données dans le code à trois adresses. Elles sont donc de la forme ETn où n est un nombre.
 
-Les opérateurs sont définit dans un fichier à part. Ce sont des entiers positifs dont la valeur est comprise entre 257 et 310.
+Les opérateurs sont définis dans un fichier à part. Ce sont des entiers positifs dont la valeur est comprise entre 257 et 310.
 
 Le triplet de noms correspond soit aux noms des arguments et du résultat, soit à des numéraux.
 
@@ -389,8 +389,8 @@ Le quadruplet SUIV permet de construire la simple-liste de quadruplets.
 
 \subsubsection{Les environnements}
 
-Les environnements sont ce qui rend l’interpréteur utilisable. Ils permettent de stocker les variables et leur valeur.
-En fin d’exécution de l'interpréteur, on voit s'afficher le résultat de l’exécution, avec la valeur de chaque variables.
+Les environnements sont ce qui rend l’interpréteur utilisable. Ils permettent de stocker les variables et leurs valeurs.
+En fin d’exécution de l'interpréteur, on voit s'afficher le résultat de l’exécution, avec la valeur de chaque variable.
 
 Un environnement est une liste de couples. Une cellule environnement est donc définie par le triplet suivant :
 
@@ -421,12 +421,12 @@ On obtient le résultat d'environnement suivant :
 
 \subsection{Éléments programmés}
 
-Nous allons voir dans cette partie, de quelle manières nous avons choisit de programmer les différentes instructions de l'interpréteur.
+Nous allons voir dans cette partie, de quelle manière nous avons choisi de programmer les différentes instructions de l'interpréteur.
 
-Il est a noté que pour ce faire, notre lexer, en fin d'exécution, "déroule" la biliste de quadruplet.
+Il est a noter que pour ce faire, notre lexer, en fin d'exécution, "déroule" la biliste de quadruplet.
 \subsubsection{Opérations arithmétiques, logiques et comparatifs}
 Nous avons dans un premier temps traité les opération "simple", en commençant par les opérations arithmétiques et logiques.
-Pour ce faire nous avons récupérer les valeurs des variables depuis l'environnement, puis nous avons effectué l'opération en question sur ces deux variables et l'avons stocké dans la variable destination.
+Pour ce faire nous avons récupéré les valeurs des variables depuis l'environnement, puis nous avons effectué l'opération en question sur ces deux variables et l'avons stockée dans la variable destination.
 
 Voici un exemple pour les opérations à deux arguments :
 
@@ -443,11 +443,11 @@ Voici un exemple pour les opérations à deux arguments :
     }
 \end{lstlisting}
 
-Ici, dans q->OP se trouve l'opérateur, comme on l'a vu précédemment. Si l'opérateur est un correspond à une opération arithmétique ou logique, on affecte à la variable destination (q->RES) la valeur du résultat de l'opération (qui est effectué dans la fonction eval).
+Ici, dans q->OP se trouve l'opérateur, comme on l'a vu précédemment. Si l'opérateur correspond à une opération arithmétique ou logique, on affecte à la variable destination (q->RES) la valeur du résultat de l'opération (qui est effectuée dans la fonction eval).
 \medbreak
-Dans le cas de l'opérateur Not, on cherche juste la valeur de la variable passée en ARG1, puis on effectue l'opération du not en C et stockons le résultat dans la variable destination.
+Dans le cas de l'opérateur Not, on cherche juste la valeur de la variable passée en ARG1, puis on effectue l'opération du not en C et on stocke le résultat dans la variable destination.
 \medbreak
-L’opérateur Lt (lower than), quand à lui, doit comparer deux valeurs. Il suffit donc de récupérer les valeurs des deux arguments et d'effectuer la comparaison :
+L’opérateur Lt (lower than), quant à lui, doit comparer deux valeurs. Il suffit donc de récupérer les valeurs des deux arguments et d'effectuer la comparaison :
 
 \begin{lstlisting}
     if(q->OP == Pl || q->OP == Mu || q->OP == Mo
@@ -465,23 +465,23 @@ L’opérateur Lt (lower than), quand à lui, doit comparer deux valeurs. Il suf
 
 \subsubsection{Opération de sauts, de non changement d'environnement et de fin de programme}
 
-Les opération de jump sont programmés de manière a ce que, dans le cas on doit faire un saut, le quadruplet que nous allons lire a la prochaine itération de la boucle, sera non pas le suivant du quadruplet actuel, mais celui dont l'étiquette est désigné par la destination.
+Les opération de jump sont programmées de manière a ce que, dans le cas où on doit faire un saut, le quadruplet que nous allons lire a la prochaine itération de la boucle, sera non pas le suivant du quadruplet actuel, mais celui dont l'étiquette est désignée par la destination.
 \medbreak
-L'opération skip qui n'a aucun effet sur l'environnement, a tout simplement était laissé vide. On ne fait aucune opération, on se contente juste de passer à l'instruction suivante.
+L'opération skip qui n'a aucun effet sur l'environnement, a tout simplement été laissée vide. On ne fait aucune opération, on se contente juste de passer à l'instruction suivante.
 \medbreak
 L'opération stop effectue un "return 0" dans le programme C, permettant de dire que le programme s'est terminé de manière normale.
 
 \subsubsection{Opérateurs pour les fonctions}
 
 Pour implémenter les appels de fonctions en code à trois adresses, il a été nécessaire de créer une pile d'appel.
-Pour ce faire, nous avons créé un tableau d'environnements appelé stack. Stack[0] est l'environnement dans lequel nous n'avons pas encore appelé de fonctions.
+Pour ce faire, nous avons créé un tableau d'environnements appelé stack. Stack[0] est l'environnement global dans lequel nous n'avons pas encore appelé de fonctions.
 Toutes les cases du tableau sont initialisées à NULL pour éviter des problèmes d'erreurs de segmentation.
 
 De plus nous avons ajouté une variable servant de pointeur de pile, pour savoir à quel endroit nous en somme. Ce pointeur s'appelle stackLayer (ce nom est arbitraire).
 \bigbreak
 L'opérateur param fait en sorte d'ajouter dans le stack[stackLayer + 1] la variable de nom ARG1 et de valeur ARG2. Il a le même fonctionnement qu'un opérateur d'affectation, seulement il ne le fait pas dans le même environnement.
 \medbreak
-L'opérateur call permet de lancer une fonction débuttant à l'étiquette destination. Pour ce faire il a fallut commencer par vérifier que le stackLayer suivant ne dépasse pas la taille de la pile.
+L'opérateur call permet de lancer une fonction débutant à l'étiquette destination. Pour ce faire il a fallu commencer par vérifier que le stackLayer suivant ne dépasse pas la taille de la pile.
 Si c'était le cas, le programme s'arrête en retournant l'erreur "Stack Overflow"
 
 Une fois que cette vérification est faite, il suffit de modifier le QUAD courant vers l'étiquette, de stocker le SUIV du QUAD courant dans une pile de QUAD temporaire (pour y revenir plus tard), et de changer l'environnement courant par l'environnement stack[stackLayer + 1].
@@ -492,14 +492,14 @@ Sinon, le programme repart vers l'état qu'il avait avant le dernier call, en mo
 
 \subsubsection{Opérateurs d'affectation}
 
-Les opérateurs d'affectations on tous plus ou moins le même fonctionnement. En effet, que ce soit à partir de la valeur d'une variable ou d'un numéral, la seule chose qui change est la fonction qu'on utilise pour récupérer la valeur a affecté (valch() dans le cas d'une valeur de variable et atoi dans le cas d'un numéral).
-Cependant, une chose qui est importante de noter est la manière que nous avons utiliser pour traiter les tableaux.
+Les opérateurs d'affectation ont tous plus ou moins le même fonctionnement. En effet, que ce soit à partir de la valeur d'une variable ou d'un numéral, la seule chose qui change est la fonction qu'on utilise pour récupérer la valeur à affecter (valch() dans le cas d'une valeur de variable et atoi dans le cas d'un numéral).
+Cependant, une chose qui est importante à noter est la méthode que nous avons utiliser pour traiter les tableaux.
 \medbreak
 Nous ne savions pas exactement comment traiter le cas de l'affectation depuis ou vers une case d'un tableau.
-Pour ce faire, nous avons raisonner de la manière suivante : les tableaux fonctionne comme les variables classiques, ils ont cependant une notation légèrement différente.
+Pour ce faire, nous avons raisonné de la manière suivante : les tableaux fonctionnent comme les variables classiques, ils ont cependant une notation légèrement différente.
 
 Nous avons donc décider d'utiliser le système de notation existant. Pour insérer une valeur dans la variable X1[3], nous avons simplement créé une variable se nommant exactement "X1[3]".
-Du fait que les variables ne peuvent être composées que de lettres et de nombres, il est impossibles pour l'utilisateur d'en créer une ayant cette forme.
+Du fait que les variables ne peuvent être composées que de lettres et de nombres, il est impossible pour l'utilisateur d'en créer une ayant cette forme.
 Ainsi, quand on utilise l'instruction AfInd, on concatène ARG1, '[', ARG2 et ']' pour créer ladite case du tableau.
 
 Si ARG2 est une variable, alors on utilise la valeur de ARG2, si c'est un numéral, on utilise le numéral tel quel, sinon on renvoie une erreur.
