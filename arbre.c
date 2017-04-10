@@ -22,7 +22,9 @@ nodeType *con(int value, type type_con) {
     /* copy information */
     p->type = typeCon;
     p->con.value = value;
-    p->o_type = type_con ;
+    p->o_type = malloc(sizeof(type));
+    type_copy(p->o_type, type_con);
+    //p->o_type = type_con;
     return p;
 }
 
@@ -37,12 +39,14 @@ nodeType *id(char* v, type type_id) {
     /* copy information */
     p->type = typeId;
     p->id.v = strdup(v);
-    p->o_type = type_id;
+    p->o_type = malloc(sizeof(type));
+    type_copy(p->o_type, type_id);
+    //p->o_type = type_id;
     return p;
 }
 
 /* the operator node constructor */
-nodeType *opr(int oper, int nops, type type_opr, ...) {
+nodeType *opr(int oper, int nops, ...) {
     va_list ap;
     nodeType *p;
     int i;
@@ -55,14 +59,81 @@ nodeType *opr(int oper, int nops, type type_opr, ...) {
     p->type = typeOpr;
     p->opr.oper = oper;
     p->opr.nops = nops;
-    p->o_type = type_opr;
+    p->o_type = malloc(sizeof(type));
+    type t = creer_type(0, T_bot);
+    type_copy(p->o_type, t);
+
+    if(oper == Sk)
+      return p; 
 
     /* since that opr is a function with an unknown types and arguments, va_list is the proper way to implement such a node */
-    va_start(ap, type_opr);
+    va_start(ap, nops);
     for (i = 0; i < nops; i++)
         p->opr.op[i] = va_arg(ap, nodeType*);
     va_end(ap);
+
     return p;
+}
+
+nodeType* copy_id(nodeType* n){
+  nodeType *n_copy;
+
+  /* allocate node */
+  if ((n_copy = malloc(sizeof(nodeType))) == NULL)
+      yyerror("out of memory");
+
+  /* copy information */
+  n_copy->type = n->type;
+  n_copy->id.v = n->id.v ;
+  n_copy->o_type = n->o_type;
+
+  return n_copy;
+}
+
+nodeType* copy_con(nodeType* n){
+  nodeType *n_copy;
+
+  /* allocate node */
+  if ((n_copy = malloc(sizeof(nodeType))) == NULL)
+      yyerror("out of memory");
+
+  /* copy information */
+  n_copy->type = n->type;
+  n_copy->con.value = n->con.value;
+  n_copy->o_type = n->o_type ;
+
+  return n_copy;
+}
+
+nodeType* copy_opr(nodeType* n) {
+  nodeType* n_copy = malloc(sizeof(nodeType));
+
+  n_copy->type = n->type;
+  n_copy->opr.oper = n->opr.oper;
+  n_copy->opr.nops = n->opr.nops;
+
+  for(int i = 0 ; i < n_copy->opr.nops; ++i) {
+    if(n->opr.op[i] == NULL)
+      return n_copy;
+
+    switch (n->opr.op[i]->type) {
+      case typeCon:
+        n_copy->opr.op[i] = copy_con(n->opr.op[i]);
+        break;
+
+      case typeId:
+        n_copy->opr.op[i] = copy_id(n->opr.op[i]);
+        break;
+
+      case typeOpr:
+        n_copy->opr.op[i] = copy_opr(n->opr.op[i]);
+        break;
+
+      default: break;
+    }
+  }
+
+  return n_copy ;
 }
 
 /* Free the memory  */
@@ -106,6 +177,17 @@ ENTFON EntFonalloc(){
 
 /*-------------------------------------------------------------------*/
 /*-----------------------------environnements------------------------*/
+type get_type(type* t1){
+  return *(t1);
+}
+
+int get_type_dim(type* t1){
+  return t1->DIM ;
+}
+
+int get_type_typef(type* t1){
+  return t1->TYPEF;
+}
 /* 1 si t1 ==t2 , 0 sinon                   */
 int type_eq(type t1, type t2)
 {
@@ -183,6 +265,7 @@ ENVTY copier_envty(ENVTY env)
       ety->ID=Idalloc();
       strcpy(ety->ID,env->ID);
      }
+
     type_copy(&(ety->TYPE),env->TYPE);
     ety->VAL=env->VAL;
     ety->SUIV= copier_envty(env->SUIV);
@@ -380,16 +463,6 @@ void ecrire_bilenvty(BILENVTY bty)
   ecrire_envty(bty.debut);
 }
 
-/* affecte  la valeur rhs a la variable lhs */
-void affectb(BILENVTY rho_gb, char *lhs, int rhs)
-{
-    ENVTY pos;
-    pos=rechty(lhs,rho_gb.debut);
-    if (pos!=NULL)
-       pos->VAL=rhs;                   /* lhs est une var enregistree           */
-    else
-        printf("erreur: variable %s non declaree", lhs);
-}
 
 /* ajoute la variable typee (nomvar,tp) dans rho,en prem position, rho est modifie*/
 extern void ajout_var(BILENVTY rho, char *nomvar, type tp)
@@ -563,18 +636,22 @@ extern BILFON concatfn(BILFON bfn1, BILFON bfn2){
 /* les variables de bfon (params puis varloc)*/
 extern BILENVTY allvars(BILFON bfon){
   BILENVTY benvty, paramEnvty, varLocal;
-  LFON current = copier_fon(bfon.debut);
-  paramEnvty = copier_bilenvty(current->PARAM);
-  varLocal = copier_bilenvty(current->VARLOC);
+  benvty = bilenvty_vide(); paramEnvty = bilenvty_vide(); varLocal = bilenvty_vide();
 
-  current = current->SUIV;
-  while(current != NULL) {
-      paramEnvty = concatty(paramEnvty, current->PARAM);
-      varLocal = concatty(varLocal, current->VARLOC);
-      current = current->SUIV;
+  if(bfon.debut != NULL && bfon.fin != NULL) {
+    LFON current = copier_fon(bfon.debut);
+    paramEnvty = copier_bilenvty(current->PARAM);
+    varLocal = copier_bilenvty(current->VARLOC);
+
+    current = current->SUIV;
+    while(current != NULL) {
+        paramEnvty = concatty(paramEnvty, current->PARAM);
+        varLocal = concatty(varLocal, current->VARLOC);
+        current = current->SUIV;
+    }
+    benvty = concatty(paramEnvty, varLocal);
   }
 
-  benvty = concatty(paramEnvty, varLocal);
   return benvty;
 }
 
@@ -582,7 +659,31 @@ extern BILENVTY allvars(BILFON bfon){
 extern void ecrire_bilfon(BILFON bfn){
   ecrire_fon(bfn.debut);
 }
+/*-------------------------------------------------------------------------------*/
+/*--------------------------Affectation------------------------------------------*/
 
+/* affecte  la valeur rhs a la variable lhs */
+void affectb(BILENVTY rho_gb, BILFON bfon, char *lhs, int rhs)
+{
+    ENVTY pos;
+    pos=rechty(lhs, rho_gb.debut);
+    if (pos!=NULL){
+       pos->VAL=rhs;
+       return ;
+    }
+
+    BILENVTY all_vars = allvars(bfon);
+    if(all_vars.debut != NULL && all_vars.fin != NULL) {
+      pos = rechty(lhs, all_vars.debut);
+      if(pos != NULL) {
+        pos->VAL = rhs;
+        return ;
+      }
+    }
+
+    else
+      printf("erreur: variable %s non declaree", lhs);
+}
 
 /*-------------------------------------------------------------------------------*/
 /*---------------------programmes -----------------------------------------------*/

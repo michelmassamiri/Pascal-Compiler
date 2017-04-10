@@ -53,7 +53,7 @@ typedef struct nodeTypeTag {
         oprNodeType opr;        /* operators */
     };
 
-    type o_type ;               /* type of the non-terminal or terminal like : integer, boolean, ... */
+    type* o_type ;               /* type of the non-terminal or terminal like : integer, boolean, ... */
 } nodeType;
 
 /* listefonctions := liste de 4-tuples (ident, BILparametres, BILvarloc, ast) */
@@ -106,10 +106,15 @@ extern ENTFON EntFonalloc(); /* retourne une en-tete de fonction */
 /*---------------------------------arbres----------------------------------------*/
 nodeType* con(int value, type type_con);
 nodeType* id(char* v, type type_id);
-nodeType* opr(int oper, int nops, type type_opr, ...);
-
+nodeType* opr(int oper, int nops, ...);
+nodeType* copy_id(nodeType* n);
+nodeType* copy_con(nodeType* n);
+nodeType* copy_opr(nodeType* n);
 /*---------------------environnements--------------------------------------------*/
 extern int  type_eq(type t1, type t2);/* 1 si t1 ==t2 , 0 sinon                  */
+extern type get_type(type* t1);
+extern int get_type_dim(type* t1);
+extern int get_type_typef(type* t1);
 extern void type_copy(type *tcop, type torig);/* copie torig vers tcop           */
 extern void type_affect(ENVTY rho, type tvar);/* affecte le type  de   *rho      */
 extern type creer_type(int dm, int tf);/* retourne le type                       */
@@ -125,6 +130,7 @@ extern int affectty(ENVTY rho, char *var, type tpvar, int val);/*   affecte var 
 extern int valchty(ENVTY rho, char *var); /* valeur de var dans envirnt-type rho */
 /*---------------------bilistes-de-var-typees------------------------------------*/
 extern void inbilenvty(BILENVTY *prho,char *var,type tvar);   /* initialise var  */
+extern void affectb(BILENVTY rho_gb, BILFON bilfon, char *lhs, int rhs); /* affecte  la valeur rhs a la variable lhs (rho_lc prioritaire) */
 extern BILENVTY bilenvty_vide() ;                  /* retourne une biliste vide  */
 extern BILENVTY creer_bilenvty(ENVTY varty);/* retourne une biliste a un element */
 extern BILENVTY copier_bilenvty(BILENVTY bty);/*pointe vers copie                */
@@ -134,6 +140,7 @@ extern void ecrire_bilenvty(BILENVTY bty); /* affiche la biliste de quadruplets 
 void ecrire_prog(BILENVTY argby,BILFON bilfon,nodeType* argno);             /* affiche le programme  */
 /* --------------------CONSTANTES -----------------------------------------------*/
 #define MAXIDENT 16          /* long max d'un identificateur de variable         */
+#define TAILLEADR 1000       /* nbe max adresses dans le tas                     */
+#define TAILLEMEM 10000      /* taille du tas
 /*---------------------VARIABLES globales ---------------------------------------*/
-//extern NOE syntree;          /* arbre syntaxique  (y.tab.c)                      */
 #endif

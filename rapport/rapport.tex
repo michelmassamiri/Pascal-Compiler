@@ -4,6 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[francais]{babel}
 \usepackage{listings}
+\usepackage{comment}
 
 
 \title{Rapport du projet de compilation}
@@ -27,32 +28,204 @@ Le présent projet de compilation a été effectué dans le cadre de l'Unité d'
 Le but de ce projet est de créer un interpréteur d'un langage similaire au langage Pascal. Il s'agit cependant d'une version simplifiée de ce langage qui se nomme Pseudo-Pascal.
 En effet il ne comportes que deux types de variables, les entiers et les booléens, et des tableaux dynamiques de ces deux types.
 
-Dans un second temps nous avons du créer un interpréteur d'un langage à trois adresses, qui sert de langage intermédiaire entre le Pseudo-Pascal et le langage assembleur de la machine.
+Dans un second temps il fallait créer un interpréteur d'un langage à trois adresses, qui sert de langage intermédiaire entre le Pseudo-Pascal et le langage assembleur de la machine.
 
-Enfin il était demande de créer un compilateur (traducteur) du langage Pseudo-Pascal vers le code à trois adresses.
+Enfin il était demandé de créer un compilateur (traducteur) du langage Pseudo-Pascal vers le code à trois adresses.
+\bigbreak
+L'organisation du rapport est symétrique : dans une première partie sur le langage Pseudo-Pascal, nous discuterons de l'interpréteur, en décrivant au préalable ce qui nous a été donné pour faire ce travail.
+Ensuite nous verrons comment nous avons écrit l'interpréteur, en essayant de détaillé un maximum ce qui est utile de détaillé.
+
+Enfin, nous verrons comment nous avons fait le compilateur, en nous basant sur ce que nous aurons dit précédemment pour l'interpréteur.
+Le schéma sera le même pour le code à trois adresses.
+
 
 \newpage
-\section{Interpreteur Pseudo Pascal}
+\section{Interpréteur Pseudo Pascal}
 
+L'interpréteur du Pseudo-Pascal se compose d'un lexer, d'un parser et d'un analyseur sémantique. A cela nous avons ajouter différentes structures de données pour créer l'interpréteur, comme par exemple un arbre de nodes.
+
+\subsection{Éléments donnés}
+
+Pour ce projet, on nous avait donner un certains nombres d'éléments. Principalement, il nous a été donné la grammaire et la syntaxe du langage pseudo-pascal, ainsi que ces spécificité.
+
+\subsubsection{Structure du code Pseudo-Pascal}
+
+Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opérateurs unaire ou binaire :
+
+\begin{tabular}{|p{2cm}|p{11cm}|}
+  \hline
+  Opérateur / mot clé PP  & effet de l'opérateur \\
+  \hline
+  \hline
+  defun & L'expression suivant ce mot clé défini une fonction\\ \hline
+  defpro & L'expression suivant ce mot clé défini une procédure\\ \hline
+  skip & Passe à l'instruction suivante\\ \hline
+  true & Renvoie la valeur "true" \\ \hline
+  false & Renvoie la valeur "false" \\ \hline
+  if & Si l'expression suivant le if est vrai, on effectue le bloc entre le then et le else\\ \hline
+  then & Le code suivant le then est a exécuter si la condition après le if est validée\\ \hline
+  else & Le code suivant le then est a exécuter si la condition après le if n'est pas validée\\ \hline
+  while & Si l'expression suivant le mot clé while vaut true, alors on boucle, sinon on sort de la boucle\\ \hline
+  do & Après le mot clé do se trouve le code de la boucle à effectuer\\ \hline
+  var & Mot clé permettant de déclarer une variable \\ \hline
+  + & Opérateur binaire retournant la somme de la valeur des expressions à sa droite et sa gauche\\ \hline
+  - & Opérateur binaire retournant la différence de la valeur des expressions qui sont à sa droite et sa gauche\\ \hline
+  * & Opérateur binaire retournant le produit de la valeur des expressions qui sont à sa droite et sa gauche\\ \hline
+  and & Opérateur binaire retournant le résultat de l'opération logique ET de la valeur des expressions qui sont à sa droite et sa gauche\\ \hline
+  or & Opérateur binaire retournant le résultat de l'opération logique OU de la valeur des expressions qui sont dà sa droite et sa gauche\\ \hline
+  not & Opérateur unaire retournant le résultat de l'opération logique NON de la valeur de l'expression à sa droite \\ \hline
+  < & Opérateur binaire retournant "true" si la valeur de l'expression de gauche est plus petite que celle de droite, "false" sinon\\ \hline
+  = & Opérateur binaire retournant "true" si la valeur de l'expression de gauche est égale à celle de droite, "false" sinon\\ \hline
+  := & Opérateur affectant à la variable à sa gauche la valeur de l'expression à sa droite \\ \hline
+\end{tabular}
+
+
+
+\subsection{Éléments programmés}
+
+Pour pouvoir créer un interpreteur du langage Pseudo-Pascal, nous avons du commencer par faire reconnaitre les différents mots clés par un lexer. Celui ci s'occupe juste de renvoyer le code correspondant au mot clé que nous vennons de lire, il sera par la suite traité par le parser.
+
+\smallbreak
+Le rôle du parser est de vérifier si la grammaire du programme est exacte. Ceci se fait via certaines règles (qui nous ont été imposées). De plus il permet de créer l'abre de dérivation du langage. Il n'y a plus qu'à "dérouler" l'arbre pour pourvoir donner les valeurs aux différentes variables et les insérer dans un environnement.
+
+\smallbreak
+Nous avons ensuite mis au point un analyseur lexical, permettant de vérifier si le type des variables, fonctions, paramettres, arguments, etc., correspondent bien entre eux et sont bien valides.
+
+\bigbreak
+
+Nous avons donc le programme qui est entré par l'utilisateur dans l'interpréteur. L'interpreteur se charge d'abord de vérifier que les mots clés existent individuellement, puis que les expressions existent.
+Si tel est le cas, on donne une valeur à chaque expression, et on vérifie si le typage est correcte.
+Puis le tout est stocké dans des environnements de noeuds, permettant d'avoir le résultat de l'éxécution en fin de programme.
 
 \newpage
 \section{Compilateur Pseudo Pascal}
 
+\subsection{Traduction directe et quasi-directe}
+Pour compiler le code du Pseudo-Pascal vers le Code à 3 adresses\footnote{Pour les informations sur le code à trois adresses (structure, fonctionnement, etc.), voir la section 4.}, nous sommes partit de l'idée suivante : les expressions simples en PP sont facilement traductible vers le C3A :
+
+\begin{lstlisting}
+    Var v : integer
+    v := 1
+\end{lstlisting}
+
+Donne en C3A
+
+\begin{lstlisting}
+    ET0 :Afc :1 : :v
+\end{lstlisting}
+
+Ou encore, pour une addition :
+
+\begin{lstlisting}
+    Var v : integer
+    v := 4 + 2
+\end{lstlisting}
+
+Donne en C3A
+
+\begin{lstlisting}
+    ET0 :Afc :4 : :X1
+    ET1 :Afc :2 : :X2
+    ET2 :Pl :X1 :X2 :v
+\end{lstlisting}
+
+\bigbreak
+
+Une fois ce constat fait, il a juste fallut se dire que les opération compliquées (comme v := (2+7) * 7) peuvent être divisées en des opérations plus simple (v := 2+7; v := v*7).
+
+Ainsi, pour reprendre les exemples entre parenthèses, le code :
+
+\begin{lstlisting}
+    Var v : integer
+    v := (2+7) * 7
+\end{lstlisting}
+
+Donne en C3A
+
+\begin{lstlisting}
+    ET0 :Afc :2 : :X1
+    ET1 :Afc :7 : :X2
+    ET2 :Pl :X1 :X2 :v
+    ET3 :Afc :7 : :X3
+    ET4 :Mu :v :X3 :v
+\end{lstlisting}
+
+Il est à noter que nous affectons deux fois la variables 7 à des variables temporaires dans cette traduction. Il est donc possible d'optimiser la compilation, en ne réaffectant pas la valeur 7 à une variable mais en utilisant directement X2, mais par manque de temps et d'expérience, nous n'y sommes pas parvenus.
+\bigbreak
+Nous avons donc la plupart des expressions qui se traduise simplement, ou qui se "découpent" pour se traduire simplement. Il reste toutefois le cas du while et du if.
+
+
+\subsection{Traductions longues}
+
+Dans le cas des instruction if ... then ... else, il faut d'abord traduire l'expression conditionnelle en plusieurs expression simples, telles qu'a la fin on puisse soit vérifier une égalité, soit si une variable est plus petite qu'une autre.
+Cette valeur sera l'opposé de la condition du if, car dans le cas ou elle est validée, on saute au jump. Ensuite on effectue un Jz (jump if zero) si l'expression est validée.
+Sinon, a la fin du bloc du if, on fait un Jp (jump) vers l’instruction suivant la fin du bloc du else.
+
+Donc, dans le cas d'une instruction Pseudo-Pascal telle que :
+\begin{lstlisting}
+    Var v : integer
+    v := 2
+    if v < 0 then v := 5
+    else v:= 10
+\end{lstlisting}
+
+Nous aurons la conversion suivante :
+
+\begin{lstlisting}
+    ET0 :Afc :2 : :v
+    ET1 :Afc :0 : :X1
+    ET2 :Lt :v :X1 :X2
+    ET3 :Not :X3 : :X3
+    ET4 :Jz :X3 : :ET7
+    ET5 :Afc :5 : :v
+    ET6 :Jp : : :ET8
+    ET7 :Afc :10 : :v
+    ET8 :Sk : : :
+\end{lstlisting}
+
+Dans ce cas, les expressions qui sont exécutées dans le corps du if ou du else sont simple, et ne prennent qu'une seule ligne en code à trois adresses, mais peuvent être beaucoup plus grosses.
+
+\bigbreak
+
+Pour traduire le while, la méthode est similaire. Il suffit d’exécuter le code, puis de vérifier si la condition est vérifiée. Si oui on continue, si non on saute au début de la boucle. Ce qui pour le code Pseudo-Pascal suivant :
+
+\begin{lstlisting}
+    Var v : integer
+    v := 2
+    do v:= v-1
+    while 0 < v
+\end{lstlisting}
+
+Donne :
+
+\begin{lstlisting}
+    ET0 :Afc :2 : :v
+    ET1 :Afc :1 : :X1
+    ET2 :Afc :0 : :X2
+
+    ET3 :Mo :v :X1 :v
+    ET4 :Lt :X2 :v :X3
+    ET5 :Jz :X3 : :ET3
+
+    ET6 :Sk : : :
+\end{lstlisting}
+
+On a donc le corps du while à l'étiquette 3, puis la vérification de la condition aux étiquettes 3 et 4. Si X2 (qui vaut 0) est plus petit que v, alors on saute à l'étiquette 3, c'est à dire la première instruction de la boucle.
 
 
 \newpage
-\section{Interpreteur Code à 3 Adresses}
+\section{Interpréteur Code à 3 Adresses}
 
-L'interpréteur du code à trois adresses se compose principalement d'un lexer. Etant donné que le code à trois adresses ne possède pas de grammaire au même titre que le langage Pseudo-Pascal,
-dû au fait qu'on ne puisse exécuter qu'une seule action élémentaire par ligne de code (il est impossible d'avoir une expression (X + Y)*2 sur une même ligne), il ne nécissite donc pas l'implémentation d'un parser associé.
+L'interpréteur du code à trois adresses se compose principalement d'un lexer. Étant donné que le code à trois adresses ne possède pas de grammaire au même titre que le langage Pseudo-Pascal,
+dû au fait qu'on ne puisse exécuter qu'une seule action élémentaire par ligne de code (il est impossible d'avoir une expression (X + Y)*2 sur une même ligne), il ne nécessite donc pas l'implémentation d'un parser associé.
 
 A ce lexer vient s'ajouter des fichiers complémentaires. Le fichier environ.c permet de créer les environnements dans lesquels vont être exécuter les différentes instruction qu'on aura au préalable écrite. Ce sont ces environnement qui vont donner les valeurs des variables en fin d'exécution.
 On utilise aussi le fichier bilquad.c permettant de créer des bi-listes de quadruplets.
 
-Les environnements, quadruplets et bi-listes de quadruplets seront définits plus loins. Nous allons commencer par voir la structure du code à trois adresses.
+Les environnements, quadruplets et bi-listes de quadruplets seront définis plus loin. Nous allons commencer par voir la structure du code à trois adresses.
 
 
-\subsection{Eléments donnés}
+\subsection{Éléments donnés}
 Nous allons d'abord passer en revue les éléments qui nous ont été donnés pour pouvoir faire ce projet. Ces éléments sont les bi-listes de quadruplets, les quadruplets, les environnements et la structure du code.
 \subsubsection{Structure du code à trois adresses}
 
@@ -62,14 +235,14 @@ Le code à trois adresses se compose de cinq éléments :
 \item Un opérateur
 \item Un premier argument
 \item Un second argument
-\item La destination de l'operation
+\item La destination de l’opération
 \end{itemize}
 
 Il est à noter que tous les éléments ne sont pas toujours nécessaires pour toutes les opérations possibles.
 \medbreak
-L'étiquette désigne grossièrement l'emplacement de l'instruction dans le programme. Elle permettent de pouvoir revenir à une instruction déjà effectuée (dans le cas d'une boucle) ou d'en sauter un certain certaines (apres une condition par exemple). Il a la forme ETx, où x désigne un nombre (par exemple ET12).
+L'étiquette désigne grossièrement l'emplacement de l'instruction dans le programme. Elle permettent de pouvoir revenir à une instruction déjà effectuée (dans le cas d'une boucle) ou d'en sauter un certain certaines (après une condition par exemple). Il a la forme ETx, où x désigne un nombre (par exemple ET12).
 
-Les arguments et la déstination pointe soit sur des variables, soit sur des étiquettes, soit des numéraux. Pour une addition par exemple, on ajoutera la valeur de la variable du premier et du second argument, et on stockera le résultat dans la destination.
+Les arguments et la destination pointe soit sur des variables, soit sur des étiquettes, soit des numéraux. Pour une addition par exemple, on ajoutera la valeur de la variable du premier et du second argument, et on stockera le résultat dans la destination.
 
 L'opérateur indique quelle opération va être effectué. Les différents opérateurs sont (dans le tableau, code à trois adresses est désigné par l'acronyme C3A):
 
@@ -89,11 +262,11 @@ L'opérateur indique quelle opération va être effectué. Les différents opér
   Afc & Affecte & Affecte au second argument la valeur du premier, qui est un numéral\\  \hline
   AfInd & Affecte à l'indice & Affecte à Arg1[Arg2] la valeur de destination\\  \hline
   Ind & Indice & Affecte à la destination la valeur de Arg1[Arg2]\\  \hline
-  Jp & Jump & Fait un saut à l'instruction dont l'etiquette est destination\\  \hline
-  Jz & Jump if Zero & Fait un saut à l'instruction dont l'etiquette est destination si la valeur du premier argument vaut 0\\  \hline
+  Jp & Jump & Fait un saut à l'instruction dont l’étiquette est destination\\  \hline
+  Jz & Jump if Zero & Fait un saut à l'instruction dont l’étiquette est destination si la valeur du premier argument vaut 0\\  \hline
   Call & Call & Appelle la fonction se trouvant à l'étiquette destination\\  \hline
   Ret & Return & Retourne à l'instruction suivant le dernier call effectué\\  \hline
-  Param & Paramettre & Ajoute un paramettre pour le prochain appel de fonction, ayant comme nom le premier argument et comme valeur celle du second\\  \hline
+  Param & Paramettre & Ajoute un paramètre pour le prochain appel de fonction, ayant comme nom le premier argument et comme valeur celle du second\\  \hline
   Sk & Skip & Ne modifie pas l'environnement, passe directement à l'instruction suivante\\  \hline
   St & Stop & Termine l'exécution du programme\\  \hline
 \end{tabular}
@@ -152,8 +325,8 @@ Le quadruplet SUIV permet de construire la simple-liste de quadruplets.
 
 \subsubsection{Les environnements}
 
-Les environnements sont ce qui rend l'interpreteur utilisable. Ils permettent de stocker les variables et leur valeur.
-En fin d'éxécution de l'interpréteur, on voit s'afficher le résultat de l'éxécution, avec la valeur de chaque variables.
+Les environnements sont ce qui rend l’interpréteur utilisable. Ils permettent de stocker les variables et leur valeur.
+En fin d’exécution de l'interpréteur, on voit s'afficher le résultat de l’exécution, avec la valeur de chaque variables.
 
 Un environnement est une liste de couples. Une cellule environnement est donc définie par le triplet suivant :
 
@@ -182,16 +355,16 @@ On obtient le résultat d'environnement suivant :
 \end{lstlisting}
 
 
-\subsection{Eléments programmés}
+\subsection{Éléments programmés}
 
 Nous allons voir dans cette partie, de quelle manières nous avons choisit de programmer les différentes instructions de l'interpréteur.
 
 Il est a noté que pour ce faire, notre lexer, en fin d'exécution, "déroule" la biliste de quadruplet.
 \subsubsection{Opérations arithmétiques, logiques et comparatifs}
-Nous avons dans un premier temps traité les opération "simple", en commencant par les opérations arithmétiques et logiques.
-Pour ce faire nous avons récupérer les valeurs des variables depuit l'environnement, puis nous avons effectué l'opération en question sur ces deux variables et l'avons stocké dans la variable destination.
+Nous avons dans un premier temps traité les opération "simple", en commençant par les opérations arithmétiques et logiques.
+Pour ce faire nous avons récupérer les valeurs des variables depuis l'environnement, puis nous avons effectué l'opération en question sur ces deux variables et l'avons stocké dans la variable destination.
 
-Voici un exemple pour les oppérations à deux arguments :
+Voici un exemple pour les opérations à deux arguments :
 
 \begin{lstlisting}
     if(q->OP == Pl || q->OP == Mu || q->OP == Mo
@@ -202,16 +375,15 @@ Voici un exemple pour les oppérations à deux arguments :
         affect(environnement, q->RES,
                         eval(q->OP, valch(environnement, q->ARG1)
                                   , valch(environnement, q->ARG2)
-                            )
-               );
+                            ));
     }
 \end{lstlisting}
 
-Ici, dans q->OP se trouve l'opérateur, comme on l'a vu précédemment. Si l'opérateur est un correspond à une opération arithùétique ou logique, on affecte à la variable destination (q->RES) la valeur du résultat de l'opération (qui est effectué dans la fonction eval).
+Ici, dans q->OP se trouve l'opérateur, comme on l'a vu précédemment. Si l'opérateur est un correspond à une opération arithmétique ou logique, on affecte à la variable destination (q->RES) la valeur du résultat de l'opération (qui est effectué dans la fonction eval).
 \medbreak
 Dans le cas de l'opérateur Not, on cherche juste la valeur de la variable passée en ARG1, puis on effectue l'opération du not en C et stockons le résultat dans la variable destination.
 \medbreak
-L'operateur Lt (lower than), quand à lui, doit comparer deux valeurs. Il suffit donc de récupérer les valeurs des deux arguments et d'effectuer la comparaison :
+L’opérateur Lt (lower than), quand à lui, doit comparer deux valeurs. Il suffit donc de récupérer les valeurs des deux arguments et d'effectuer la comparaison :
 
 \begin{lstlisting}
     if(q->OP == Pl || q->OP == Mu || q->OP == Mo
@@ -229,7 +401,7 @@ L'operateur Lt (lower than), quand à lui, doit comparer deux valeurs. Il suffit
 
 \subsubsection{Opération de sauts, de non changement d'environnement et de fin de programme}
 
-Les opération de jump sont programmés de manière a ce que, dans le cas on doit faire un saut, le quadruplet que nous allons lire a la prochaine itération de la boucle, sera non pas le suivant du quadruplet actuel, mais celui dont l'étiquette est désigné par la destinantion.
+Les opération de jump sont programmés de manière a ce que, dans le cas on doit faire un saut, le quadruplet que nous allons lire a la prochaine itération de la boucle, sera non pas le suivant du quadruplet actuel, mais celui dont l'étiquette est désigné par la destination.
 \medbreak
 L'opération skip qui n'a aucun effet sur l'environnement, a tout simplement était laissé vide. On ne fait aucune opération, on se contente juste de passer à l'instruction suivante.
 \medbreak
@@ -237,11 +409,11 @@ L'opération stop effectue un "return 0" dans le programme C, permettant de dire
 
 \subsubsection{Opérateurs pour les fonctions}
 
-Pour implémenter les appels de focntions en code à trois adresses, il a été nécessaire de créer une pile d'appel.
-Pour ce faire, nous avons céer un tableau d'environnements appelé stack. Stack[0] est l'environnement dans lequel nous n'avons pas encore appelé de fonctions.
-Toutes les cases du tableau sont initialiser à NULL pour éviter des problèmes d'erreurs de segmentation.
+Pour implémenter les appels de fonctions en code à trois adresses, il a été nécessaire de créer une pile d'appel.
+Pour ce faire, nous avons créé un tableau d'environnements appelé stack. Stack[0] est l'environnement dans lequel nous n'avons pas encore appelé de fonctions.
+Toutes les cases du tableau sont initialisées à NULL pour éviter des problèmes d'erreurs de segmentation.
 
-De plus nous avons ajouter une variable servant de pointeur de pile, pour savoir à quel endroit nous en somme. Ce pointeur s'appelle stackLayer (ce nom est arbitraire).
+De plus nous avons ajouté une variable servant de pointeur de pile, pour savoir à quel endroit nous en somme. Ce pointeur s'appelle stackLayer (ce nom est arbitraire).
 \bigbreak
 L'opérateur param fait en sorte d'ajouter dans le stack[stackLayer + 1] la variable de nom ARG1 et de valeur ARG2. Il a le même fonctionnement qu'un opérateur d'affectation, seulement il ne le fait pas dans le même environnement.
 \medbreak
@@ -254,14 +426,98 @@ L'opérateur ret a l'effet inverse du call. Il commence par vérifier que le sta
 
 Sinon, le programme repart vers l'état qu'il avait avant le dernier call, en modifiant l'environnement à stack[stackLayer - 1] et en mettant la valeur de la QUAD a celle qui est la plus haute dans la pile temporaire.
 
-\subsubsection{Opérateurs d'affectaion}
+\subsubsection{Opérateurs d'affectation}
+
+Les opérateurs d'affectations on tous plus ou moins le même fonctionnement. En effet, que ce soit à partir de la valeur d'une variable ou d'un numéral, la seule chose qui change est la fonction qu'on utilise pour récupérer la valeur a affecté (valch() dans le cas d'une valeur de variable et atoi dans le cas d'un numéral).
+Cependant, une chose qui est importante de noter est la manière que nous avons utiliser pour traiter les tableaux.
+\medbreak
+Nous ne savions pas exactement comment traiter le cas de l'affectation depuis ou vers une case d'un tableau.
+Pour ce faire, nous avons raisonner de la manière suivante : les tableaux fonctionne comme les variables classiques, ils ont cependant une notation légèrement différente.
+
+Nous avons donc décider d'utiliser le système de notation existant. Pour insérer une valeur dans la variable X1[3], nous avons simplement créé une variable se nommant exactement "X1[3]".
+Du fait que les variables ne peuvent être composées que de lettres et de nombres, il est impossibles pour l'utilisateur d'en créer une ayant cette forme.
+Ainsi, quand on utilise l'instruction AfInd, on concatène ARG1, '[', ARG2 et ']' pour créer ladite case du tableau.
+
+Si ARG2 est une variable, alors on utilise la valeur de ARG2, si c'est un numéral, on utilise le numéral tel quel, sinon on renvoie une erreur.
+Il ne reste plus qu'a assigner à cette variable la valeur souhaitée, qui se trouve dans la destination.
+
+De la même manière, nous récupérons ARG1[ARG2]
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{comment}
+
+=====================================
+-------------------------------------
+    COMMENTAIRE
+-------------------------------------
+=====================================
 
 \newpage
 \section{Compilateur Code à 3 Adresses}
 
+L'essentiel du fonctionnement du compilateur du code à trois adresses vers un langage assembleur est identique au fonctionnement de l'interpreteur.
+En effet, on lit le code puis on le stock dans une bi-liste de quadruplets. La différence réside au moment de traiter le code précédemment lu.
+
+Ici nous n'allons pas remplir des environnements comme nous l'avons fait précédemment, mais nous allons écrire les différentes instructions dans le langage machine, qui dans ce cas est le Y86.
+L'écriture du code Y86 se fait sur la sortie standard, via la fonction C "printf", que nous pouvons rediriger dans le but d'écrire le code directement dans un fichier.
+
+Le fait que l'écriture se fasse sur la sortie standard permet de tester plus simplement le programme sur des petits exemples.
+
+
+\subsection{Traduction directe et quasi-directe}
+
+
+Une partie de cette conversion a été assez simple, dû au fait qu'il existe des correspondances dirrecte (ou en 2 instruction, en ajoutant mrmovl dans certains cas) pour certaines instruction :
+
+\begin{center}
+    \begin{tabular}{|c|c|}
+        \hline
+        Code C3A & Code Y86 \\
+        \hline
+        \hline
+        Jp & jmp\\ \hline
+        Jz & je\\ \hline
+        St & halt\\ \hline
+        Sk & nop\\ \hline
+        Pl & addl \\ \hline
+        Mo & subl \\ \hline
+        And & andl \\ \hline
+        Or & orl \\ \hline
+        Call & call \\ \hline
+        Ret & ret \\ \hline
+        Param & pushl \\ \hline
+    \end{tabular}
+\end{center}
+
+
+Comme nous pouvons le voir, sur les 18 insructions du code à trois adresses, 11 sont traduisible immédiatement ou presque. A celles-ci on peut ajouter le Mu, qui a été donner dans les exemples de code du projet.
+
+\subsection{Traductions longues}
+\end{comment}
 
 
 \end{document}
