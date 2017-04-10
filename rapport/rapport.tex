@@ -28,14 +28,16 @@ Le présent projet de compilation a été effectué dans le cadre de l'Unité d'
 Le but de ce projet est de créer un interpréteur d'un langage similaire au langage Pascal. Il s'agit cependant d'une version simplifiée de ce langage qui se nomme Pseudo-Pascal.
 En effet il ne comportes que deux types de variables, les entiers et les booléens, et des tableaux dynamiques de ces deux types.
 
-Dans un second temps nous avons du créer un interpréteur d'un langage à trois adresses, qui sert de langage intermédiaire entre le Pseudo-Pascal et le langage assembleur de la machine.
+Dans un second temps il fallait créer un interpréteur d'un langage à trois adresses, qui sert de langage intermédiaire entre le Pseudo-Pascal et le langage assembleur de la machine.
 
-Enfin il était demande de créer un compilateur (traducteur) du langage Pseudo-Pascal vers le code à trois adresses.
+Enfin il était demandé de créer un compilateur (traducteur) du langage Pseudo-Pascal vers le code à trois adresses.
 \bigbreak
-L'organisation du rapport est symétrique : dans une première partie sur un langage, nous discuterons de l'interpréteur, en décrivant au préalable ce qui nous a été donné pour faire ce travail.
+L'organisation du rapport est symétrique : dans une première partie sur le langage Pseudo-Pascal, nous discuterons de l'interpréteur, en décrivant au préalable ce qui nous a été donné pour faire ce travail.
 Ensuite nous verrons comment nous avons écrit l'interpréteur, en essayant de détaillé un maximum ce qui est utile de détaillé.
 
 Enfin, nous verrons comment nous avons fait le compilateur, en nous basant sur ce que nous aurons dit précédemment pour l'interpréteur.
+Le schéma sera le même pour le code à trois adresses.
+
 
 \newpage
 \section{Interpreteur Pseudo Pascal}
@@ -81,7 +83,13 @@ Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opé
 
 \subsection{Eléments programmés}
 
+Pour pouvoir créer un interpreteur du langage Pseudo-Pascal, nous avons du commencer par faire reconnaitre les différents mots clés par un lexer. Celui ci s'occupe juste de renvoyer le code correspondant au mot clé que nous vennons de lire, il sera par la suite traité par le parser.
 
+\smallbreak
+Le rôle du parser est de vérifier si la grammaire du programme est exacte. Ceci se fait via certaines règles (qui nous ont été imposées). De plus il permet de créer l'abre de dérivation du langage. Il n'y a plus qu'à "dérouler" l'arbre pour pourvoir donner les valeurs aux différentes variables et les insérer dans un environnement.
+
+\smallbreak
+Nous avons ensuite mis au point un analyseur lexical, permettant de vérifier si le type des variables, fonctions, paramettres, arguments, etc., correspondent bien entre eux et sont bien valides.
 
 \newpage
 \section{Compilateur Pseudo Pascal}
