@@ -33,7 +33,7 @@ Dans un second temps il fallait créer un interpréteur d'un langage à trois ad
 Enfin il était demandé de créer un compilateur (traducteur) du langage Pseudo-Pascal vers le code à trois adresses.
 \bigbreak
 L'organisation du rapport est symétrique : dans une première partie sur le langage Pseudo-Pascal, nous discuterons de l'interpréteur, en décrivant au préalable ce qui nous a été donné pour faire ce travail.
-Ensuite nous verrons comment nous avons écrit l'interpréteur, en essayant de détaillé un maximum ce qui est utile de détaillé.
+Ensuite nous verrons comment nous avons écrit l'interpréteur, en essayant de détaillé un maximum ce qui est utile de détailler.
 
 Enfin, nous verrons comment nous avons fait le compilateur, en nous basant sur ce que nous aurons dit précédemment pour l'interpréteur.
 Le schéma sera le même pour le code à trois adresses.
@@ -46,7 +46,7 @@ L'interpréteur du Pseudo-Pascal se compose d'un lexer, d'un parser et d'un anal
 
 \subsection{Éléments donnés}
 
-Pour ce projet, on nous avait donner un certains nombres d'éléments. Principalement, il nous a été donné la grammaire et la syntaxe du langage pseudo-pascal, ainsi que ces spécificité.
+Pour ce projet, on nous avait donné un certains nombres d'éléments. Principalement, il nous a été donné la grammaire et la syntaxe du langage pseudo-pascal, ainsi que ces spécificités.
 
 \subsubsection{Structure du code Pseudo-Pascal}
 
@@ -83,13 +83,77 @@ Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opé
 
 \subsection{Éléments programmés}
 
-Pour pouvoir créer un interpreteur du langage Pseudo-Pascal, nous avons du commencer par faire reconnaitre les différents mots clés par un lexer. Celui ci s'occupe juste de renvoyer le code correspondant au mot clé que nous vennons de lire, il sera par la suite traité par le parser.
+Pour pouvoir créer un interpreteur du langage Pseudo-Pascal, nous avons du commencer par faire reconnaitre les différents mots clés par un lexer. Celui ci s'occupe juste de renvoyer le code correspondant au mot clé que nous venons de lire, il sera par la suite traité par le parser.
+
+Quelques exemples d'opérations reconnus ainsi que leur code de retour:
+\begin{lstlisting}
+    "+" { return Pl; }
+    "-" { return Mo; }
+    "not" { return Not; }
+    ":=" { return Af; }
+    "if" { return If; }
+    "then" { return Th; }
+    "skip" { return Sk; }
+\end{lstlisting}
+
+Autres exemples de mots clés reconnus ainsi que leur code de retour:
+\begin{lstlisting}
+"skip" { return Sk; }
+    "boolean" { return T_boo; } : reconnait le mot type boolean
+    "integer" { return T_int; } : reconnait le mot type integer
+    "new array of" { return NewAr; } : reconnait l'initialisation d'un tableau
+    "defun" { BEGIN(FONC); return Def;} : reconnait la declaration d'une fonction
+\end{lstlisting}
+
+Ces codes de retour vont être utilisés par la suite dans le parser.
 
 \smallbreak
 Le rôle du parser est de vérifier si la grammaire du programme est exacte. Ceci se fait via certaines règles (qui nous ont été imposées). De plus il permet de créer l'abre de dérivation du langage. Il n'y a plus qu'à "dérouler" l'arbre pour pourvoir donner les valeurs aux différentes variables et les insérer dans un environnement.
+Le parser définit donc des règles comme par exemple:
+
+\begin{lstlisting}
+E     : E Pl T    { $$ = opr(Pl, 2, $1, $3); calcul_type(benvty, entcour, varloc, $$, line); }
+\end{lstlisting}
+
+Cette règle va ainsi vérifier si la grammaire est exacte si on lit " X1 + X2 " par exemple et ensuite créée le noeud correspondant à l'opération '+' ainsi que son fils gauche et droit dans l'arbre contenant les expressions. Il est à noter qu'il va également calculer le type.
 
 \smallbreak
-Nous avons ensuite mis au point un analyseur lexical, permettant de vérifier si le type des variables, fonctions, paramettres, arguments, etc., correspondent bien entre eux et sont bien valides.
+Nous avons ensuite mis au point un analyseur lexical (ou sémantique), permettant de vérifier si le type des variables, fonctions, paramètres, arguments, etc., correspondent bien entre eux et sont bien valides.
+Par exemple le code ci-dessous:
+
+\begin{lstlisting}
+case Pl: case Mo: case Mu:
+    tint=creer_type(0,T_int);
+    tfg=e->opr.op[0]->o_type;
+    tfd=e->opr.op[1]->o_type;
+    if (type_eq(tfg,tint) && type_eq(tfd,tint))
+    {
+      type_copy(&tp,tfg);        /* calcule le type */
+      type_copy(&(e->o_type),tfg);/* affecte le type */
+    }
+    else
+    {
+      type_copy(&tp,terr);/* calcule le type                               */
+      type_copy(&(e->o_type),terr); /* affecte type                         */
+      typ_error("op entier sur args non-entiers",ligne);/* message erreur  */
+    }
+    return(tp);
+\end{lstlisting}
+
+Cela signifie que pour la cas de l'opération 'Plus' 'Moins' ou 'Multiplier', l'analyseur sémantique vérifie que les types des fils gauches et droites (donc les variables utilisées) pour ces opérations sont bien du même type, sinon il retourne une erreur de typage.
+
+\smallbreak
+L'interpreteur est une fonction récursive qui une fois que la grammaire et le typage sont vérifiés va réellement executer le code en fonction des différentes opérations.
+
+Par exemple dans le cas de l'opération "Plus":
+
+\begin{lstlisting}
+case Pl :
+          return interpreter_recursive(benvty, bfon, n->opr.op[0]) + interpreter_recursive(benvty, bfon, n->opr.op[1]);
+\end{lstlisting}
+
+Ce code va donc exécuter l'opération avec "+" avec le fils gauche et le fils droit du noeud.
+
 
 \bigbreak
 
