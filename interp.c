@@ -10,7 +10,7 @@
 
 /*-------------------------------------------------------------------*/
 /* ----------------------------types---------------------------------*/
-/*  NOE,ENVTY,BILENVTY  : definis dans arbre.h                       */
+/*  nodeType*,ENVTY,BILENVTY  : definis dans arbre.h                       */
 /*-------------------------------------------------------------------*/
 
 
@@ -62,91 +62,111 @@ void ecrire_memoire(int maxadr, int maxtal, int maxtas)
 /*---------------semantique-------------------------------------------*/
 /* N.B.allocation dynamique de tableaux; mais pas de ramasse-miettes! */
 
-/* semantique op a grands pas des expressions                         */
-/* fait agir e sur rho_gb, le  modifie, retourne val(e)               */
-int semval(BILENVTY rho_gb,NOE e)
-{ if(e != NULL)
-    {ENVTY pos;
-      int res,taille;
-            switch(e->codop)
-	{
-	 case Ind:
-	   {int tab=semval(rho_gb,e->FG);        /* adresse du tableau    */
-	   int ind=semval(rho_gb,e->FD);         /* index dans le tableau */
-	   return(TAS[ADR[tab]+ind]);
-	   }
-	case Pl:case Mo:case Mu:case And:case Or:case Lt:case  Eq:/* op binaire      */
-	    return(eval(e->codop,semval(rho_gb,e->FG),semval(rho_gb,e->FD)));
-	case Not:                                            /* operation unaire      */
-	  return(eval(e->codop,semval(rho_gb,e->FG),0));
-	case I:                        /* numeral                     */
-	  return (atoi(e->ETIQ));
-	case V:                         /* variable                   */
-	  {pos=rechty(e->ETIQ,rho_gb.debut);
-	     return(pos->VAL);          /* rho_g(var)                */
-	  }
-	case NewAr:                                /* creation tableau                */
-	  {taille=semval(rho_gb,e->FD);            /* taille du tableau               */
-	    res=padrl;
-	    ADR[res]=ptasl;
-	    TAL[res]=taille;
-	    padrl++;ptasl+=taille;     /* mise a jour allocateur  memoire              */
+static int interpreter_recursive(BILENVTY benvty, BILFON bfon, nodeType* n) {
+  if(n == NULL)
+    return 0;
+
+  if(n->type == typeCon)
+    return n->con.value;
+
+  if(n->type == typeId){
+    ENVTY pos = rechty(n->id.v, benvty.debut);
+    if(pos == NULL) {
+      BILENVTY all_vars = allvars(bfon);
+      pos = rechty(n->id.v, all_vars.debut);
+    }
+
+    return pos->VAL;
+  }
+
+  if(n->type == typeOpr) {
+    char *lhs; int rhs;
+    int res, taille ;
+
+    switch(n->opr.oper) {
+      case Mp : interpreter_recursive(benvty, bfon, n->opr.op[0]); break;
+      case Wh :
+                while(interpreter_recursive(benvty, bfon, n->opr.op[0])) interpreter_recursive(benvty, bfon, n->opr.op[1]); return 0;
+      case If :
+                if(n->opr.op[2] != NULL) {
+                    if(interpreter_recursive(benvty, bfon, n->opr.op[0])) interpreter_recursive(benvty, bfon, n->opr.op[1]);
+                    else {
+                       interpreter_recursive(benvty, bfon, n->opr.op[2]);
+                    }
+                }
+                else {
+                  if(interpreter_recursive(benvty, bfon, n->opr.op[0])) interpreter_recursive(benvty, bfon, n->opr.op[1]);
+                }
+                return 0;
+      case Sk :
+                return 0 ;
+      case Se :
+                interpreter_recursive(benvty, bfon, n->opr.op[0]) ; interpreter_recursive(benvty, bfon, n->opr.op[1]); return 0;
+      case Pl :
+                return interpreter_recursive(benvty, bfon, n->opr.op[0]) + interpreter_recursive(benvty, bfon, n->opr.op[1]);
+      case Mo :
+                return interpreter_recursive(benvty, bfon, n->opr.op[0]) - interpreter_recursive(benvty, bfon, n->opr.op[1]);
+      case Mu :
+                return interpreter_recursive(benvty, bfon, n->opr.op[0]) * interpreter_recursive(benvty, bfon, n->opr.op[1]);
+      case And :
+                return interpreter_recursive(benvty, bfon, n->opr.op[0]) && interpreter_recursive(benvty, bfon, n->opr.op[1]);
+      case Or :
+                return interpreter_recursive(benvty, bfon, n->opr.op[0]) || interpreter_recursive(benvty, bfon, n->opr.op[1]);
+      case Lt :
+                return (interpreter_recursive(benvty, bfon, n->opr.op[0]) < interpreter_recursive(benvty, bfon, n->opr.op[1])) ;
+      case Eq :
+                return (interpreter_recursive(benvty, bfon, n->opr.op[0]) == interpreter_recursive(benvty, bfon, n->opr.op[1]));
+      case Not :
+                return !(interpreter_recursive(benvty, bfon, n->opr.op[0]));
+      case Ind :
+                {
+                  int tab = interpreter_recursive(benvty, bfon, n->opr.op[0]);        /* adresse du tableau    */
+             	    int ind = interpreter_recursive(benvty, bfon, n->opr.op[1]);         /* index dans le tableau */
+             	    return(TAS[ADR[tab]+ind]);
+                }
+      case NewAr:  /* creation tableau                */
+            	  {
+                  taille = interpreter_recursive(benvty ,bfon, n->opr.op[0]); /* taille du tableau */
+            	    res = padrl;
+            	    ADR[res] = ptasl;
+            	    TAL[res] = taille;
+            	    padrl++;ptasl+=taille; /* mise a jour allocateur  memoire              */
             	    return(res);
-	  }
-	default: return(EXIT_FAILURE);  /* codop inconnu au bataillon */
-	  }
-	}
-  else
-    return(EXIT_FAILURE);
+            	  }
+      case Af :
+                if (n->opr.op[0]->type == typeId)        /* affectation a une variable */
+                {
+                  lhs = n->opr.op[0]->id.v;
+                  printf("lhs vaut %s \n",lhs);
+                  rhs = interpreter_recursive(benvty, bfon, n->opr.op[1]);
+                  printf("rhs vaut %d \n",rhs);
+                  affectb(benvty, bfon, lhs, rhs);
+                }
+                else
+                {
+                  nodeType* FG = n->opr.op[0];
+                  if(FG->type == typeOpr) {
+                    assert(FG->opr.oper == Ind);      /* affectation a un tableau */
+                    int tabl= interpreter_recursive(benvty, bfon, FG->opr.op[0]);
+                    int index=interpreter_recursive(benvty, bfon, FG->opr.op[1]);
+                    rhs = interpreter_recursive(benvty, bfon, n->opr.op[1]);
+                    TAS[ADR[tabl]+index]=rhs;
+                    /*TODO: tester que index < taille */
+                  }
+                }
+                return 0;
+
+      default : break;
+    }
+  }
+  return 0;
 }
 
-/* semantique op a grands pas des commandes                      */
-/* fait agir c sur rho_gb, le  modifie                           */
-void semop_gp(BILENVTY rho_gb, NOE c)
-{char *lhs; int rhs; int cond;
- if(c != NULL)
-    {switch(c->codop)
-       {case Mp:
-	    semop_gp(rho_gb, c->FG);
-	    break;
-	case Af:
-	  	  if (c->FG->codop==V)        /* affectation a une variable */
-	    {lhs= c->FG->ETIQ;
-	     printf("lhs vaut %s \n",lhs);
-	     rhs= semval(rho_gb, c->FD);
-	     printf("rhs vaut %d \n",rhs);
-	     affectb(rho_gb, lhs, rhs);
-	    }
-	  else
-	    {assert(c->FG->codop==Ind);/* affectation a un tableau */
-	     int tabl= semval(rho_gb, c->FG->FG);
-	     int index=semval(rho_gb, c->FG->FD);
-	     rhs=semval(rho_gb, c->FD);
-	     TAS[ADR[tabl]+index]=rhs;
-	     /*TODO: tester que index < taille */
-	    }
-	  break;
-	case Sk: break;
-	case Se:
-	  semop_gp(rho_gb, c->FG);
-	  semop_gp(rho_gb, c->FD);
-	  break;
-	case If:
-	  cond= semval(rho_gb, c->FG);
-	  if (cond!=0)                /* cas ou cond !=0 */
-	    semop_gp(rho_gb, c->FD->FG);
-	  else                        /* cas ou cond ==0 */
-	    semop_gp(rho_gb, c->FD->FD);
-	  break;
-	case Wh:
-	  cond= semval(rho_gb, c->FG);
-	  if (cond != 0)           /* on execute seq(corps,c)*/
-	    {semop_gp(rho_gb, c->FD);
-	      semop_gp(rho_gb, c);
-	    }
-	  break;
-	default: break;
-	}
-    };
-return;
+int interpreter(BILENVTY benvty, BILFON bfon, nodeType* n) {
+  //if(e == NULL)
+    //yyerror("error environt e is NULL in interpreter");
+
+  interpreter_recursive(benvty, bfon, n);
+  //ecrire_env(e);
+  return 0;
 }
