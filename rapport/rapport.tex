@@ -91,6 +91,12 @@ Le rôle du parser est de vérifier si la grammaire du programme est exacte. Cec
 \smallbreak
 Nous avons ensuite mis au point un analyseur lexical, permettant de vérifier si le type des variables, fonctions, paramettres, arguments, etc., correspondent bien entre eux et sont bien valides.
 
+\bigbreak
+
+Nous avons donc le programme qui est entré par l'utilisateur dans l'interpréteur. L'interpreteur se charge d'abord de vérifier que les mots clés existent individuellement, puis que les expressions existent.
+Si tel est le cas, on donne une valeur à chaque expression, et on vérifie si le typage est correcte.
+Puis le tout est stocké dans des environnements de noeuds, permettant d'avoir le résultat de l'éxécution en fin de programme.
+
 \newpage
 \section{Compilateur Pseudo Pascal}
 
