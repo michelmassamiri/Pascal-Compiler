@@ -22,7 +22,9 @@ nodeType *con(int value, type type_con) {
     /* copy information */
     p->type = typeCon;
     p->con.value = value;
-    p->o_type = type_con ;
+    p->o_type = malloc(sizeof(type));
+    type_copy(p->o_type, type_con);
+    //p->o_type = type_con;
     return p;
 }
 
@@ -37,7 +39,9 @@ nodeType *id(char* v, type type_id) {
     /* copy information */
     p->type = typeId;
     p->id.v = strdup(v);
-    p->o_type = type_id;
+    p->o_type = malloc(sizeof(type));
+    type_copy(p->o_type, type_id);
+    //p->o_type = type_id;
     return p;
 }
 
@@ -55,14 +59,81 @@ nodeType *opr(int oper, int nops, ...) {
     p->type = typeOpr;
     p->opr.oper = oper;
     p->opr.nops = nops;
+    p->o_type = malloc(sizeof(type));
+    type t = creer_type(0, T_bot);
+    type_copy(p->o_type, t);
+
+    if(oper == Sk)
+      return p; 
 
     /* since that opr is a function with an unknown types and arguments, va_list is the proper way to implement such a node */
     va_start(ap, nops);
     for (i = 0; i < nops; i++)
         p->opr.op[i] = va_arg(ap, nodeType*);
     va_end(ap);
-    
+
     return p;
+}
+
+nodeType* copy_id(nodeType* n){
+  nodeType *n_copy;
+
+  /* allocate node */
+  if ((n_copy = malloc(sizeof(nodeType))) == NULL)
+      yyerror("out of memory");
+
+  /* copy information */
+  n_copy->type = n->type;
+  n_copy->id.v = n->id.v ;
+  n_copy->o_type = n->o_type;
+
+  return n_copy;
+}
+
+nodeType* copy_con(nodeType* n){
+  nodeType *n_copy;
+
+  /* allocate node */
+  if ((n_copy = malloc(sizeof(nodeType))) == NULL)
+      yyerror("out of memory");
+
+  /* copy information */
+  n_copy->type = n->type;
+  n_copy->con.value = n->con.value;
+  n_copy->o_type = n->o_type ;
+
+  return n_copy;
+}
+
+nodeType* copy_opr(nodeType* n) {
+  nodeType* n_copy = malloc(sizeof(nodeType));
+
+  n_copy->type = n->type;
+  n_copy->opr.oper = n->opr.oper;
+  n_copy->opr.nops = n->opr.nops;
+
+  for(int i = 0 ; i < n_copy->opr.nops; ++i) {
+    if(n->opr.op[i] == NULL)
+      return n_copy;
+
+    switch (n->opr.op[i]->type) {
+      case typeCon:
+        n_copy->opr.op[i] = copy_con(n->opr.op[i]);
+        break;
+
+      case typeId:
+        n_copy->opr.op[i] = copy_id(n->opr.op[i]);
+        break;
+
+      case typeOpr:
+        n_copy->opr.op[i] = copy_opr(n->opr.op[i]);
+        break;
+
+      default: break;
+    }
+  }
+
+  return n_copy ;
 }
 
 /* Free the memory  */
@@ -106,6 +177,17 @@ ENTFON EntFonalloc(){
 
 /*-------------------------------------------------------------------*/
 /*-----------------------------environnements------------------------*/
+type get_type(type* t1){
+  return *(t1);
+}
+
+int get_type_dim(type* t1){
+  return t1->DIM ;
+}
+
+int get_type_typef(type* t1){
+  return t1->TYPEF;
+}
 /* 1 si t1 ==t2 , 0 sinon                   */
 int type_eq(type t1, type t2)
 {
@@ -183,6 +265,7 @@ ENVTY copier_envty(ENVTY env)
       ety->ID=Idalloc();
       strcpy(ety->ID,env->ID);
      }
+
     type_copy(&(ety->TYPE),env->TYPE);
     ety->VAL=env->VAL;
     ety->SUIV= copier_envty(env->SUIV);
