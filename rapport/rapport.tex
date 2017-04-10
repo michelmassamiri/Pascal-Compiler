@@ -83,7 +83,7 @@ Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opé
 
 \subsection{Éléments programmés}
 
-Pour pouvoir créer un interpréteur du langage Pseudo-Pascal, nous avons dû commencer par faire reconnaître les différents mots clés par un lexer. Celui-ci s'occupe juste de renvoyer le code correspondant au mot clé que nous venons de lire, il sera par la suite traité par le parser.
+Pour pouvoir créer un interpréteur du langage Pseudo-Pascal, nous avons du commencer par faire reconnaître les différents mots clés par un lexer. Celui-ci s'occupe juste de renvoyer le code correspondant au mot clé que nous venons de lire, il sera par la suite traité par le parser.
 
 Quelques exemples d'opérations reconnus ainsi que leur code de retour :
 \begin{lstlisting}
@@ -159,7 +159,7 @@ Ce code va donc exécuter l'opération avec "+" avec le fils gauche et le fils d
 
 Nous avons donc le programme qui est entré par l'utilisateur dans l'interpréteur. L’interpréteur se charge d'abord de vérifier que les mots clés existent individuellement, puis que les expressions existent.
 Si tel est le cas, on donne une valeur à chaque expression, et on vérifie si le typage est correct.
-Puis le tout est stocké dans des environnements de nœuds, permettant d'avoir le résultat de l’exécution en fin de programme.
+Puis le tout est stocké dans des environnements de noeuds, permettant d'avoir le résultat de l’exécution en fin de programme.
 
 \bigbreak
 
@@ -293,7 +293,7 @@ On a donc le corps du while à l'étiquette 3, puis la vérification de la condi
 \section{Interpréteur Code à 3 Adresses}
 
 L'interpréteur du code à trois adresses se compose principalement d'un lexer. Étant donné que le code à trois adresses ne possède pas de grammaire au même titre que le langage Pseudo-Pascal,
-dû au fait qu'on ne puisse exécuter qu'une seule action élémentaire par ligne de code (il est impossible d'avoir une expression (X + Y)*2 sur une même ligne), il ne nécessite donc pas l'implémentation d'un parser associé.
+du au fait qu'on ne puisse exécuter qu'une seule action élémentaire par ligne de code (il est impossible d'avoir une expression (X + Y)*2 sur une même ligne), il ne nécessite donc pas l'implémentation d'un parser associé.
 
 A ce lexer vient s'ajouter des fichiers complémentaires. Le fichier environ.c permet de créer les environnements dans lesquels vont être exécuter les différentes instructions qu'on aura au préalable écrites. Ce sont ces environnements qui vont donner les valeurs des variables en fin d'exécution.
 On utilise aussi le fichier bilquad.c permettant de créer des bi-listes de quadruplets.
@@ -567,7 +567,7 @@ Le fait que l'écriture se fasse sur la sortie standard permet de tester plus si
 \subsection{Traduction directe et quasi-directe}
 
 
-Une partie de cette conversion a été assez simple, dû au fait qu'il existe des correspondances dirrecte (ou en 2 instruction, en ajoutant mrmovl dans certains cas) pour certaines instruction :
+Une partie de cette conversion a été assez simple, du au fait qu'il existe des correspondances dirrecte (ou en 2 instruction, en ajoutant mrmovl dans certains cas) pour certaines instruction :
 
 \begin{center}
     \begin{tabular}{|c|c|}
