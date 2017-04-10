@@ -86,6 +86,7 @@ Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opé
 \newpage
 \section{Compilateur Pseudo Pascal}
 
+\subsection{Traduction directe et quasi-directe}
 Pour compiler le code du Pseudo-Pascal vers le Code à 3 adresses\footnote{Pour les informations sur le code à trois adresses (structure, fonctionnement, etc.), voir la section 4.}, nous sommes partit de l'idée suivante : les expressions simples en PP sont facilement traductible vers le C3A :
 
 \begin{lstlisting}
@@ -139,6 +140,12 @@ Il est à noter que nous affectons deux fois la variables 7 à des variables tem
 \bigbreak
 Nous avons donc la plupart des expressions qui se traduise simplement, ou qui se "découpent" pour se traduire simplement. Il reste toutefois le cas du while et du if.
 
+
+\subsection{Traductions longues}
+
+Dans le cas des instruction if ... then ... else, il faut d'abord traduire l'expression conditionnelle en plusieurs expression simples, telles qu'a la fin on puisse soit vérifier une égalité, soit si une variable est plus petite qu'une autre.
+Cette valeur sera l'opposé de la condition du if, car dans le cas ou elle est validée, on saute au jump. Ensuite on effectue un Jz (jump if zero) si l'expression est validée.
+Sinon, a la fin du bloc du if, on fait un Jp (jump) vers l'instruciton suivant la fin du block du else.
 \newpage
 \section{Interpreteur Code à 3 Adresses}
 
