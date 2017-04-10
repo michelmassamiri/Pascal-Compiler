@@ -34,6 +34,22 @@ Enfin il était demande de créer un compilateur (traducteur) du langage Pseudo-
 \newpage
 \section{Interpreteur Pseudo Pascal}
 
+L'interpréteur du Pseudo-Pascal se compose d'un lexer, d'un parser et d'un analyseur sémantique.
+
+\subsection{Eléments donnés}
+
+Pour ce projet, on nous avait donner un certains nombres d'éléments. Prinsipalement, il nous a été donné la grammaire et la syntaxe du langage pseudo-pascal, ainsi que ces spécificité.
+
+Le langage pseudo pascal contient donc un certain nombre de mots clés et d'opérateurs unaire ou binaire :
+
+\begin{tabular}{|l|l|}
+  \hline
+  Opérateur / mot clé Pseudo-Pascal  & effet de l'opérateur \\
+  \hline
+  \hline
+
+\end{tabular}
+
 
 \newpage
 \section{Compilateur Pseudo Pascal}
@@ -281,7 +297,7 @@ L'écriture du code Y86 se fait sur la sortie standard, via la fonction C "print
 
 Le fait que l'écriture se fasse sur la sortie standard permet de tester plus simplement le programme sur des petits exemples.
 
-\bigbreak
+\subsection{Traduction directe et quasi directe}
 
 Une partie de cette conversion a été assez simple, dû au fait qu'il existe des correspondances dirrecte (ou en 2 instruction, en ajoutant mrmovl dans certains cas) pour certaines instruction :
 
@@ -297,6 +313,8 @@ Une partie de cette conversion a été assez simple, dû au fait qu'il existe de
         Sk & nop\\ \hline
         Pl & addl \\ \hline
         Mo & subl \\ \hline
+        Or & orl \\ \hline
+        And & andl \\ \hline
         Call & call \\ \hline
         Ret & ret \\ \hline
         Param & pushl \\ \hline
@@ -304,7 +322,7 @@ Une partie de cette conversion a été assez simple, dû au fait qu'il existe de
 \end{center}
 
 
-Comme nous pouvons le voir, sur les 18 insructions du code à trois adresses, 9 sont traduisible immédiatement ou presque. A celles ci on peut ajouter le Mu, qui a été donner dans les exemples de code du projet.
+Comme nous pouvons le voir, sur les 18 insructions du code à trois adresses, 11 sont traduisible immédiatement ou presque. A celles ci on peut ajouter le Mu, qui a été donner dans les exemples de code du projet.
 
 
 
