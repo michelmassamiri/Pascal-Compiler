@@ -25,12 +25,12 @@ int ex_bis(ENV *e, nodeType *p)
     case Afc:
         ex_bis(e, p->opr.op[0]);
         snprintf(buf1f, 20, "%d", p->con.value);
-        snprintf(buf1f2, 20, "CT%d", p->opr.op[0]->id.id);
+        snprintf(buf1f2, 20, "CT%d", p->opr.op[0]->id.v);
         print(current++, "Afc", buf1, NULL, buf1f2);
         break;
     case typeId:
         snprintf(buf1, 20, "CT%d", ++currentC);
-        print(current++, "Af", buf1, p->id.id, NULL);
+        print(current++, "Af", buf1, p->id.v, NULL);
         break;
     case typeOpr:
         switch (p->opr.oper)
@@ -62,7 +62,7 @@ int ex_bis(ENV *e, nodeType *p)
         case Af:
             ex_bis(e, p->opr.op[1]);
             snprintf(buf1, 20, "CT%d", currentC);
-            print(current++, "Af", p->opr.op[0]->id.id, buf1, NULL);
+            print(current++, "Af", p->opr.op[0]->id.v, buf1, NULL);
             break;
 
         case St:
@@ -144,7 +144,7 @@ int ex_bis(ENV *e, nodeType *p)
             snprintf(buf2, 20, "CT%d", currentC);
             print(current++, "Ret", buf1, buf2, NULL);
             break;
-            
+
         case Pl:
             ex_bis(e, p->opr.op[0]);
             leftCurrent = currentC;

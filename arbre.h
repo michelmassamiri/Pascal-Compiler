@@ -143,5 +143,4 @@ void ecrire_prog(BILENVTY argby,BILFON bilfon,nodeType* argno);             /* a
 #define TAILLEADR 1000       /* nbe max adresses dans le tas                     */
 #define TAILLEMEM 10000      /* taille du tas
 /*---------------------VARIABLES globales ---------------------------------------*/
-//extern NOE syntree;          /* arbre syntaxique  (y.tab.c)                      */
 #endif
