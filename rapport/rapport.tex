@@ -146,6 +146,59 @@ Nous avons donc la plupart des expressions qui se traduise simplement, ou qui se
 Dans le cas des instruction if ... then ... else, il faut d'abord traduire l'expression conditionnelle en plusieurs expression simples, telles qu'a la fin on puisse soit vérifier une égalité, soit si une variable est plus petite qu'une autre.
 Cette valeur sera l'opposé de la condition du if, car dans le cas ou elle est validée, on saute au jump. Ensuite on effectue un Jz (jump if zero) si l'expression est validée.
 Sinon, a la fin du bloc du if, on fait un Jp (jump) vers l'instruciton suivant la fin du block du else.
+
+Donc, dans le cas d'une instruction Pseudo-Pascal telle que :
+\begin{lstlisting}
+    Var v : integer
+    v := 2
+    if v < 0 then v := 5
+    else v:= 10
+\end{lstlisting}
+
+Nous aurons la conversion suivante :
+
+\begin{lstlisting}
+    ET0 :Afc :2 : :v
+    ET1 :Afc :0 : :X1
+    ET2 :Lt :v :X1 :X2
+    ET3 :Not :X3 : :X3
+    ET4 :Jz :X3 : :ET7
+    ET5 :Afc :5 : :v
+    ET6 :Jp : : :ET8
+    ET7 :Afc :10 : :v
+    ET8 :Sk : : :
+\end{lstlisting}
+
+Dans ce cas, les expressions qui sont exécutées dans le corps du if ou du else sont simple, et ne prennent qu'une seule ligne en code à trois adresses, mais peuvent être beaucoup plus grosses.
+
+\bigbreak
+
+Pour traduire le while, la méthode est similaire. Il suffit d'éxécuter le code, puis de vérifier si la condition est vérifiée. Si oui on continue, si non on saute au début de la boucle. Ce qui pour le code Pseudo-Pascal suivant :
+
+\begin{lstlisting}
+    Var v : integer
+    v := 2
+    do v:= v-1
+    while 0 < v
+\end{lstlisting}
+
+Donne :
+
+\begin{lstlisting}
+    ET0 :Afc :2 : :v
+    ET1 :Afc :1 : :X1
+    ET2 :Afc :0 : :X2
+
+    ET3 :Mo :v :X1 :v
+    ET4 :Lt :X2 :v :X3
+    ET5 :Jz :X3 : :ET3
+
+    ET6 :Sk : : :
+\end{lstlisting}
+
+On a donc le corps du while à l'étiquette 3, puis la vérification de la condition aux étiquettes 3 et 4. Si X2 (qui vaut 0) est plus petit que v, alors on saute à l'étiquette 3, c'est à dire la première instruction de la boucle.
+
+
 \newpage
 \section{Interpreteur Code à 3 Adresses}
 
